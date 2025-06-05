@@ -19,7 +19,7 @@ export default function SubCustomerSignIn() {
   
   const router = useRouter()
   const searchParams = useSearchParams()
-  const callbackUrl = searchParams.get("callbackUrl") || "/subcustomer-dashboard"
+  const callbackUrl = searchParams.get("callbackUrl") || "/subcustomer/dashboard"
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()

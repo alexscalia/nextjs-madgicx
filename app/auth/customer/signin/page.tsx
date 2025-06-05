@@ -19,7 +19,7 @@ export default function CustomerSignIn() {
   
   const router = useRouter()
   const searchParams = useSearchParams()
-  const callbackUrl = searchParams.get("callbackUrl") || "/customer-dashboard"
+  const callbackUrl = searchParams.get("callbackUrl") || "/customer/dashboard"
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
