@@ -14,11 +14,23 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model StaffRole {
+  id          String @id @default(uuid())
+  name        String
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  deletedAt   DateTime?
+
+  staffUsers  StaffUser[]
+}
+
 model StaffUser {
-  id           Int      @id @default(autoincrement())
+  id           String   @id @default(uuid())
   email        String   @unique
   name         String?
-  role         String   // 'admin', 'support'
+  roleId       String
+  role         StaffRole @relation(fields: [roleId], references: [id])
   passwordHash String
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
@@ -26,7 +38,7 @@ model StaffUser {
 }
 
 model Customer {
-  id           Int      @id @default(autoincrement())
+  id           String   @id @default(uuid())
   name         String?
   companyName  String?
   email        String   @unique
@@ -46,8 +58,8 @@ model Customer {
 }
 
 model CustomerUser {
-  id           Int      @id @default(autoincrement())
-  customerId   Int
+  id           String   @id @default(uuid())
+  customerId   String
   customer     Customer @relation(fields: [customerId], references: [id])
   email        String   @unique
   name         String?
@@ -59,8 +71,8 @@ model CustomerUser {
 }
 
 model SubCustomer {
-  id              Int      @id @default(autoincrement())
-  customerId      Int
+  id              String   @id @default(uuid())
+  customerId      String
   customer        Customer @relation(fields: [customerId], references: [id])
   email           String   @unique
   name            String?
@@ -77,10 +89,10 @@ model SubCustomer {
 }
 
 model ConnectedAccount {
-  id             Int      @id @default(autoincrement())
-  customerId     Int
+  id             String   @id @default(uuid())
+  customerId     String
   customer       Customer @relation(fields: [customerId], references: [id])
-  subCustomerId  Int?     
+  subCustomerId  String?     
   subCustomer    SubCustomer? @relation(fields: [subCustomerId], references: [id])
   platform       String   // 'meta', 'google_ads', 'ga4', 'tiktok'
   accessToken    String?
@@ -97,12 +109,12 @@ model ConnectedAccount {
 }
 
 model Campaign {
-  id                 Int      @id @default(autoincrement())
-  customerId         Int
+  id                 String   @id @default(uuid())
+  customerId         String
   customer           Customer @relation(fields: [customerId], references: [id])
-  subCustomerId      Int?
+  subCustomerId      String?
   subCustomer        SubCustomer? @relation(fields: [subCustomerId], references: [id])
-  connectedAccountId Int?
+  connectedAccountId String?
   connectedAccount   ConnectedAccount? @relation(fields: [connectedAccountId], references: [id])
   platform           String
   campaignId         String
@@ -122,8 +134,8 @@ model Campaign {
 }
 
 model Ad {
-  id          Int      @id @default(autoincrement())
-  campaignId  Int
+  id          String   @id @default(uuid())
+  campaignId  String
   campaign    Campaign @relation(fields: [campaignId], references: [id])
   adId        String
   name        String
@@ -136,10 +148,10 @@ model Ad {
 }
 
 model Funnel {
-  id             Int      @id @default(autoincrement())
-  customerId     Int
+  id             String   @id @default(uuid())
+  customerId     String
   customer       Customer @relation(fields: [customerId], references: [id])
-  subCustomerId  Int?
+  subCustomerId  String?
   subCustomer    SubCustomer? @relation(fields: [subCustomerId], references: [id])
   platform       String
   stage          String   // 'awareness', 'consideration', 'conversion'
@@ -152,10 +164,10 @@ model Funnel {
 }
 
 model Report {
-  id                   Int      @id @default(autoincrement())
-  customerId           Int
+  id                   String   @id @default(uuid())
+  customerId           String
   customer             Customer @relation(fields: [customerId], references: [id])
-  subCustomerId        Int?
+  subCustomerId        String?
   subCustomer          SubCustomer? @relation(fields: [subCustomerId], references: [id])
   type                 String
   filters              Json
