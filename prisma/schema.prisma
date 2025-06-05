@@ -13,3 +13,156 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+model StaffUser {
+  id           Int      @id @default(autoincrement())
+  email        String   @unique
+  name         String?
+  role         String   // 'admin', 'support'
+  passwordHash String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  deletedAt    DateTime?
+}
+
+model Customer {
+  id           Int      @id @default(autoincrement())
+  name         String?
+  companyName  String?
+  email        String   @unique
+  passwordHash String
+  plan         String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  deletedAt    DateTime?
+
+  // Relationships
+  users             CustomerUser[]
+  subCustomers      SubCustomer[]
+  connectedAccounts ConnectedAccount[]
+  campaigns         Campaign[]
+  funnels           Funnel[]
+  reports           Report[]
+}
+
+model CustomerUser {
+  id           Int      @id @default(autoincrement())
+  customerId   Int
+  customer     Customer @relation(fields: [customerId], references: [id])
+  email        String   @unique
+  name         String?
+  role         String   // 'admin', 'editor'
+  passwordHash String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  deletedAt    DateTime?
+}
+
+model SubCustomer {
+  id              Int      @id @default(autoincrement())
+  customerId      Int
+  customer        Customer @relation(fields: [customerId], references: [id])
+  email           String   @unique
+  name            String?
+  passwordHash    String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  deletedAt       DateTime?
+
+  // Relationships
+  connectedAccounts ConnectedAccount[]
+  campaigns         Campaign[]
+  funnels           Funnel[]
+  reports           Report[]
+}
+
+model ConnectedAccount {
+  id             Int      @id @default(autoincrement())
+  customerId     Int
+  customer       Customer @relation(fields: [customerId], references: [id])
+  subCustomerId  Int?     
+  subCustomer    SubCustomer? @relation(fields: [subCustomerId], references: [id])
+  platform       String   // 'meta', 'google_ads', 'ga4', 'tiktok'
+  accessToken    String?
+  refreshToken   String?
+  accountId      String
+  accountName    String
+  syncedAt       DateTime?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  deletedAt      DateTime?
+
+  // Relationships
+  campaigns      Campaign[]
+}
+
+model Campaign {
+  id                 Int      @id @default(autoincrement())
+  customerId         Int
+  customer           Customer @relation(fields: [customerId], references: [id])
+  subCustomerId      Int?
+  subCustomer        SubCustomer? @relation(fields: [subCustomerId], references: [id])
+  connectedAccountId Int?
+  connectedAccount   ConnectedAccount? @relation(fields: [connectedAccountId], references: [id])
+  platform           String
+  campaignId         String
+  name               String
+  status             String
+  budget             Float?
+  startDate          DateTime?
+  endDate            DateTime?
+  metrics            Json
+  date               DateTime
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+  deletedAt          DateTime?
+
+  // Relationships
+  ads                Ad[]
+}
+
+model Ad {
+  id          Int      @id @default(autoincrement())
+  campaignId  Int
+  campaign    Campaign @relation(fields: [campaignId], references: [id])
+  adId        String
+  name        String
+  creativeId  String
+  metrics     Json
+  date        DateTime
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  deletedAt   DateTime?
+}
+
+model Funnel {
+  id             Int      @id @default(autoincrement())
+  customerId     Int
+  customer       Customer @relation(fields: [customerId], references: [id])
+  subCustomerId  Int?
+  subCustomer    SubCustomer? @relation(fields: [subCustomerId], references: [id])
+  platform       String
+  stage          String   // 'awareness', 'consideration', 'conversion'
+  conversions    Int
+  cost           Float
+  date           DateTime
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  deletedAt      DateTime?
+}
+
+model Report {
+  id                   Int      @id @default(autoincrement())
+  customerId           Int
+  customer             Customer @relation(fields: [customerId], references: [id])
+  subCustomerId        Int?
+  subCustomer          SubCustomer? @relation(fields: [subCustomerId], references: [id])
+  type                 String
+  filters              Json
+  generatedAt          DateTime @default(now())
+  fileUrl              String
+  visibleToSubCustomers Boolean @default(true)
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+  deletedAt            DateTime?
+}
