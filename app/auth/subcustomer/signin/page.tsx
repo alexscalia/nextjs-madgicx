@@ -7,15 +7,14 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
 import { Users2, BarChart3 } from "lucide-react"
+import { getAuthError, showAuthError, showAuthSuccess } from "@/lib/auth-utils"
 
 export default function SubCustomerSignIn() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState("")
   
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -24,7 +23,6 @@ export default function SubCustomerSignIn() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
-    setError("")
 
     try {
       const result = await signIn("subcustomer-signin", {
@@ -33,13 +31,23 @@ export default function SubCustomerSignIn() {
         redirect: false,
       })
 
-      if (result?.error) {
-        setError("Invalid email or password")
+      if (result?.error || result?.status === 401) {
+        const authError = getAuthError(result)
+        showAuthError(authError)
       } else if (result?.ok) {
+        showAuthSuccess("Welcome back! Redirecting to dashboard...")
         router.push(callbackUrl)
+      } else {
+        const authError = getAuthError(result)
+        showAuthError(authError)
       }
     } catch (error) {
-      setError("An error occurred. Please try again.")
+      const authError = {
+        type: 'network' as const,
+        message: 'Connection failed',
+        details: 'Unable to connect to authentication server. Please check your internet connection.'
+      }
+      showAuthError(authError)
     } finally {
       setIsLoading(false)
     }
@@ -77,12 +85,6 @@ export default function SubCustomerSignIn() {
               </Badge>
             </div>
 
-            {error && (
-              <Alert variant="destructive" className="mb-4">
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
-            )}
-
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="email">Sub-Customer Email</Label>
@@ -112,10 +114,17 @@ export default function SubCustomerSignIn() {
 
               <Button
                 type="submit"
-                className="w-full bg-purple-600 hover:bg-purple-700"
+                className="w-full bg-purple-600 hover:bg-purple-700 disabled:opacity-50"
                 disabled={isLoading}
               >
-                {isLoading ? "Signing in..." : "Access Sub-Customer Portal"}
+                {isLoading ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    Signing in...
+                  </>
+                ) : (
+                  "Access Sub-Customer Portal"
+                )}
               </Button>
             </form>
 

@@ -7,15 +7,14 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
 import { Shield, Users } from "lucide-react"
+import { getAuthError, showAuthError, showAuthSuccess } from "@/lib/auth-utils"
 
 export default function StaffSignIn() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState("")
   
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -24,7 +23,6 @@ export default function StaffSignIn() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
-    setError("")
 
     try {
       const result = await signIn("staff-signin", {
@@ -33,13 +31,23 @@ export default function StaffSignIn() {
         redirect: false,
       })
 
-      if (result?.error) {
-        setError("Invalid email or password")
+      if (result?.error || result?.status === 401) {
+        const authError = getAuthError(result)
+        showAuthError(authError)
       } else if (result?.ok) {
+        showAuthSuccess("Welcome back! Redirecting to dashboard...")
         router.push(callbackUrl)
+      } else {
+        const authError = getAuthError(result)
+        showAuthError(authError)
       }
     } catch (error) {
-      setError("An error occurred. Please try again.")
+      const authError = {
+        type: 'network' as const,
+        message: 'Connection failed',
+        details: 'Unable to connect to authentication server. Please check your internet connection.'
+      }
+      showAuthError(authError)
     } finally {
       setIsLoading(false)
     }
@@ -77,12 +85,6 @@ export default function StaffSignIn() {
               </Badge>
             </div>
 
-            {error && (
-              <Alert variant="destructive" className="mb-4">
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
-            )}
-
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="email">Staff Email</Label>
@@ -112,10 +114,17 @@ export default function StaffSignIn() {
 
               <Button
                 type="submit"
-                className="w-full bg-blue-600 hover:bg-blue-700"
+                className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50"
                 disabled={isLoading}
               >
-                {isLoading ? "Signing in..." : "Access Staff Portal"}
+                {isLoading ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    Signing in...
+                  </>
+                ) : (
+                  "Access Staff Portal"
+                )}
               </Button>
             </form>
 
