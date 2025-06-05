@@ -10,8 +10,8 @@ export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
   providers: [
     CredentialsProvider({
-      id: "staff-login",
-      name: "Staff Login",
+      id: "staff-signin",
+      name: "Staff Signin",
       credentials: {
         email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" }
@@ -62,8 +62,8 @@ export const authOptions: NextAuthOptions = {
       }
     }),
     CredentialsProvider({
-      id: "customer-login",
-      name: "Customer Login",
+      id: "customer-signin",
+      name: "Customer Signin",
       credentials: {
         email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" }
@@ -110,6 +110,59 @@ export const authOptions: NextAuthOptions = {
           return null
         }
       }
+    }),
+    CredentialsProvider({
+      id: "subcustomer-signin",
+      name: "Sub-Customer Signin",
+      credentials: {
+        email: { label: "Email", type: "email" },
+        password: { label: "Password", type: "password" }
+      },
+      async authorize(credentials) {
+        if (!credentials?.email || !credentials?.password) {
+          return null
+        }
+
+        try {
+          // Find sub-customer by email
+          const subCustomer = await prisma.subCustomer.findUnique({
+            where: {
+              email: credentials.email,
+              deletedAt: null
+            },
+            include: {
+              customer: true
+            }
+          })
+
+          if (!subCustomer) {
+            return null
+          }
+
+          // Verify password
+          const isValidPassword = await bcrypt.compare(
+            credentials.password,
+            subCustomer.passwordHash
+          )
+
+          if (!isValidPassword) {
+            return null
+          }
+
+          // Return user object
+          return {
+            id: subCustomer.id,
+            email: subCustomer.email,
+            name: subCustomer.name,
+            role: "subcustomer",
+            customerId: subCustomer.customerId,
+            customerName: subCustomer.customer.name
+          }
+        } catch (error) {
+          console.error("Auth error:", error)
+          return null
+        }
+      }
     })
   ],
   session: {
@@ -122,6 +175,8 @@ export const authOptions: NextAuthOptions = {
         token.roleId = user.roleId
         token.companyName = user.companyName
         token.plan = user.plan
+        token.customerId = user.customerId
+        token.customerName = user.customerName
       }
       return token
     },
@@ -132,6 +187,8 @@ export const authOptions: NextAuthOptions = {
         session.user.roleId = token.roleId
         session.user.companyName = token.companyName
         session.user.plan = token.plan
+        session.user.customerId = token.customerId
+        session.user.customerName = token.customerName
       }
       return session
     }

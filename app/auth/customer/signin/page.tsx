@@ -27,7 +27,7 @@ export default function CustomerSignIn() {
     setError("")
 
     try {
-      const result = await signIn("customer-login", {
+      const result = await signIn("customer-signin", {
         email,
         password,
         redirect: false,

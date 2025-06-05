@@ -27,7 +27,7 @@ export default function StaffSignIn() {
     setError("")
 
     try {
-      const result = await signIn("staff-login", {
+      const result = await signIn("staff-signin", {
         email,
         password,
         redirect: false,

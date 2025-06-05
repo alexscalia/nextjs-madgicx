@@ -27,8 +27,7 @@ export default function SubCustomerSignIn() {
     setError("")
 
     try {
-      // For now using customer-login, will need to create subcustomer-login provider later
-      const result = await signIn("customer-login", {
+      const result = await signIn("subcustomer-signin", {
         email,
         password,
         redirect: false,
