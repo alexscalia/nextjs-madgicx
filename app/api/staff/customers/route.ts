@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
+import { authOptions } from "../../auth/[...nextauth]/route"
 import { PrismaClient } from "../../../generated/prisma"
 import bcrypt from "bcryptjs"
 
@@ -8,7 +9,7 @@ const prisma = new PrismaClient()
 // GET /api/staff/customers - Get all customers with pagination, search, and filtering
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession()
+    const session = await getServerSession(authOptions)
     
     // Check if user is staff
     if (!session?.user?.role || !['Administrator', 'Support Agent'].includes(session.user.role)) {
@@ -103,7 +104,7 @@ export async function GET(request: NextRequest) {
 // POST /api/staff/customers - Create new customer
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession()
+    const session = await getServerSession(authOptions)
     
     // Check if user is staff
     if (!session?.user?.role || !['Administrator', 'Support Agent'].includes(session.user.role)) {

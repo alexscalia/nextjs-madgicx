@@ -15,8 +15,8 @@ export default function CustomersPage() {
           <h1 className="text-3xl font-bold text-gray-900">Customer Management</h1>
           <p className="text-gray-600">Manage customer accounts and settings</p>
         </div>
-        <Link href="/staff/customers/new">
-          <Button className="bg-green-600 hover:bg-green-700">
+        <Link href="/staff/customers/new" className="cursor-pointer">
+          <Button className="bg-green-600 hover:bg-green-700 cursor-pointer">
             <Plus className="h-4 w-4 mr-2" />
             Add Customer
           </Button>

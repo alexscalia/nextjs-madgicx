@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
+import { authOptions } from "../../../auth/[...nextauth]/route"
 import { PrismaClient } from "../../../../generated/prisma"
 import bcrypt from "bcryptjs"
 
@@ -11,7 +12,7 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    const session = await getServerSession()
+    const session = await getServerSession(authOptions)
     
     // Check if user is staff
     if (!session?.user?.role || !['Administrator', 'Support Agent'].includes(session.user.role)) {
@@ -52,7 +53,7 @@ export async function PUT(
   { params }: { params: { id: string } }
 ) {
   try {
-    const session = await getServerSession()
+    const session = await getServerSession(authOptions)
     
     // Check if user is staff
     if (!session?.user?.role || !['Administrator', 'Support Agent'].includes(session.user.role)) {
@@ -158,7 +159,7 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    const session = await getServerSession()
+    const session = await getServerSession(authOptions)
     
     // Check if user is staff
     if (!session?.user?.role || !['Administrator', 'Support Agent'].includes(session.user.role)) {
