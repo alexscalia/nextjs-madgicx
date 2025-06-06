@@ -107,16 +107,16 @@ async function fetchAllAdAccounts(accessToken: string) {
       if (account.business) {
         const businessId = typeof account.business === 'object' ? account.business.id : account.business
         try {
-          iconUrl = await fetchPageProfilePicture(businessId, accessToken)
-          console.log(`✅ Fetched page icon for business ${businessId}: ${iconUrl}`)
+          iconUrl = await fetchPrimaryPageProfilePicture(businessId, accessToken)
+          console.log(`✅ Fetched primary page picture for ${businessId}: ${iconUrl}`)
         } catch (error) {
-          console.log(`❌ Could not fetch page icon for ${businessId}:`, error)
-          // Fallback to business picture if page picture fails
+          console.log(`❌ Could not fetch primary page picture for ${businessId}:`, error)
+          // Fallback to direct business profile picture
           try {
-            iconUrl = await fetchBusinessProfilePicture(businessId, accessToken)
-            console.log(`🔄 Fallback: Fetched business icon for ${businessId}: ${iconUrl}`)
+            iconUrl = await fetchBusinessProfilePictureUri(businessId, accessToken)
+            console.log(`🔄 Fallback: Fetched business profile URI for ${businessId}: ${iconUrl}`)
           } catch (fallbackError) {
-            console.log(`❌ Could not fetch business icon either for ${businessId}:`, fallbackError)
+            console.log(`❌ Could not fetch business profile URI either for ${businessId}:`, fallbackError)
             
             // Last resort: try to get picture directly from ad account
             try {
@@ -229,18 +229,18 @@ async function fetchBusinessAdAccounts(accessToken: string) {
           }) => {
             let iconUrl = null
             
-            // Try to fetch page profile picture (more accurate for brands)
+            // Try to fetch primary page profile picture (more accurate for brands)
             try {
-              iconUrl = await fetchPageProfilePicture(business.id, accessToken)
-              console.log(`Fetched page icon for business ${business.id}: ${iconUrl}`)
+              iconUrl = await fetchPrimaryPageProfilePicture(business.id, accessToken)
+              console.log(`✅ Fetched primary page picture for ${business.id}: ${iconUrl}`)
             } catch (error) {
-              console.log(`Could not fetch page icon for ${business.id}:`, error)
-              // Fallback to business picture if page picture fails
+              console.log(`❌ Could not fetch primary page picture for ${business.id}:`, error)
+              // Fallback to direct business profile picture
               try {
-                iconUrl = await fetchBusinessProfilePicture(business.id, accessToken)
-                console.log(`Fallback: Fetched business icon for ${business.id}: ${iconUrl}`)
+                iconUrl = await fetchBusinessProfilePictureUri(business.id, accessToken)
+                console.log(`🔄 Fallback: Fetched business profile URI for ${business.id}: ${iconUrl}`)
               } catch (fallbackError) {
-                console.log(`Could not fetch business icon either for ${business.id}:`, fallbackError)
+                console.log(`❌ Could not fetch business profile URI either for ${business.id}:`, fallbackError)
               }
             }
 
@@ -274,53 +274,87 @@ async function fetchBusinessAdAccounts(accessToken: string) {
   }
 }
 
-// Fetch Facebook page profile picture (better for brands)
-async function fetchPageProfilePicture(businessId: string, accessToken: string): Promise<string | null> {
+// Fetch primary page profile picture (higher quality, better brand representation)
+async function fetchPrimaryPageProfilePicture(businessId: string, accessToken: string): Promise<string | null> {
   try {
-    // First, get the pages associated with this business
-    const pagesUrl = `https://graph.facebook.com/v18.0/${businessId}/pages?access_token=${accessToken}`
-    console.log(`Fetching pages for business: ${pagesUrl}`)
+    // Step 1: Get the primary page ID from business
+    const businessUrl = `https://graph.facebook.com/v19.0/${businessId}?fields=name,primary_page&access_token=${accessToken}`
+    console.log(`🔍 Fetching primary page for business: ${businessUrl}`)
     
-    const pagesResponse = await fetch(pagesUrl)
+    const businessResponse = await fetch(businessUrl)
     
-    if (!pagesResponse.ok) {
-      console.log(`Failed to fetch pages: ${pagesResponse.status} ${pagesResponse.statusText}`)
-      throw new Error('Failed to fetch business pages')
+    if (!businessResponse.ok) {
+      console.log(`❌ Failed to fetch business: ${businessResponse.status} ${businessResponse.statusText}`)
+      throw new Error('Failed to fetch business')
     }
 
-    const pagesData = await pagesResponse.json()
-    console.log(`Pages response:`, pagesData)
+    const businessData = await businessResponse.json()
+    console.log(`📋 Business response:`, businessData)
     
-    if (pagesData.data && pagesData.data.length > 0) {
-      // Use the first page (usually the main brand page)
-      const mainPage = pagesData.data[0]
-      const pageId = mainPage.id
-      
-      // Fetch the page profile picture
-      const pictureUrl = `https://graph.facebook.com/v18.0/${pageId}/picture?type=large&redirect=false&access_token=${accessToken}`
-      console.log(`Fetching page picture from: ${pictureUrl}`)
-      
-      const pictureResponse = await fetch(pictureUrl)
-      
-      if (!pictureResponse.ok) {
-        console.log(`Failed to fetch page picture: ${pictureResponse.status} ${pictureResponse.statusText}`)
-        throw new Error('Failed to fetch page picture')
-      }
+    // Check if we got a primary_page
+    if (!businessData.primary_page || !businessData.primary_page.id) {
+      console.log(`⚠️  No primary_page found for business ${businessId}`)
+      throw new Error('No primary page found')
+    }
 
-      const pictureData = await pictureResponse.json()
-      console.log(`Page picture response:`, pictureData)
-      
-      // Facebook returns the actual picture URL in the data.url field when redirect=false
-      if (pictureData.data && pictureData.data.url && !pictureData.data.is_silhouette) {
-        console.log(`Found page picture URL: ${pictureData.data.url}`)
-        return pictureData.data.url
-      }
+    const pageId = businessData.primary_page.id
+    console.log(`🎯 Found primary page ID: ${pageId}`)
+    
+    // Step 2: Get the page picture with custom size
+    const pageUrl = `https://graph.facebook.com/v19.0/${pageId}/picture?type=large&redirect=false&access_token=${accessToken}`
+    console.log(`🖼️  Fetching page picture: ${pageUrl}`)
+    
+    const pageResponse = await fetch(pageUrl)
+    
+    if (!pageResponse.ok) {
+      console.log(`❌ Failed to fetch page picture: ${pageResponse.status} ${pageResponse.statusText}`)
+      throw new Error('Failed to fetch page picture')
+    }
+
+    const pageData = await pageResponse.json()
+    console.log(`🖼️  Page picture response:`, pageData)
+    
+    // Check if we got a valid picture URL (not silhouette)
+    if (pageData.data && pageData.data.url && !pageData.data.is_silhouette) {
+      console.log(`✅ Found primary page picture URL: ${pageData.data.url}`)
+      return pageData.data.url
     }
     
-    console.log(`No pages or page pictures found for business ${businessId}`)
+    console.log(`⚠️  No valid picture found for page ${pageId} (silhouette or no data)`)
     return null
   } catch (error) {
-    console.log('Error fetching page profile picture:', error)
+    console.log('❌ Error fetching primary page profile picture:', error)
+    return null
+  }
+}
+
+// Fallback: Fetch business profile picture directly (using profile_picture_uri field)
+async function fetchBusinessProfilePictureUri(businessId: string, accessToken: string): Promise<string | null> {
+  try {
+    // Direct business profile picture using profile_picture_uri field
+    const businessUrl = `https://graph.facebook.com/v19.0/${businessId}?fields=name,profile_picture_uri&access_token=${accessToken}`
+    console.log(`🔄 Fallback: Fetching business profile directly: ${businessUrl}`)
+    
+    const response = await fetch(businessUrl)
+    
+    if (!response.ok) {
+      console.log(`❌ Failed to fetch business profile: ${response.status} ${response.statusText}`)
+      throw new Error('Failed to fetch business profile')
+    }
+
+    const data = await response.json()
+    console.log(`📋 Business profile response:`, data)
+    
+    // Check if we got a profile_picture_uri
+    if (data.profile_picture_uri) {
+      console.log(`✅ Found business profile picture URI: ${data.profile_picture_uri}`)
+      return data.profile_picture_uri
+    }
+    
+    console.log(`⚠️  No profile_picture_uri found for business ${businessId}`)
+    return null
+  } catch (error) {
+    console.log('❌ Error fetching business profile picture URI:', error)
     return null
   }
 }
