@@ -1,22 +1,9 @@
 import { CustomerForm } from "@/components/staff/customer-form"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { ArrowLeft } from "lucide-react"
-import Link from "next/link"
 
 export default function NewCustomerPage() {
   return (
     <div className="p-6 space-y-6">
-      {/* Breadcrumb Navigation */}
-      <div className="mb-4">
-        <Link href="/staff/customers">
-          <Button variant="ghost" size="sm" className="text-gray-600 hover:text-gray-900 px-0">
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Customers
-          </Button>
-        </Link>
-      </div>
-
       {/* Header */}
       <div>
         <h1 className="text-3xl font-bold text-gray-900">Add New Customer</h1>
