@@ -45,7 +45,7 @@ interface DiscoveredAccount {
   currency: string
   timezone: string
   status: number
-  business?: string
+  business?: string | { id: string; name: string }
   businessName?: string
   spendCap?: string
   createdTime: string
@@ -341,7 +341,7 @@ export function ConnectAccountDialog({ customerId, open: externalOpen, onOpenCha
                                     )}
                                     {account.business && (
                                       <div className="mt-1 text-xs text-gray-500">
-                                        <span className="font-medium">Business ID:</span> {account.business}
+                                        <span className="font-medium">Business:</span> {typeof account.business === 'object' ? `${account.business.name} (${account.business.id})` : account.business}
                                       </div>
                                     )}
                                   </div>

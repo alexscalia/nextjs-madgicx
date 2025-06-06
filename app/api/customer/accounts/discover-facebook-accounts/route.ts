@@ -9,7 +9,7 @@ interface DiscoveredAccount {
   currency: string
   timezone: string
   status: number
-  business?: string
+  business?: string | { id: string; name: string }
   businessName?: string
   spendCap?: string
   createdTime: string
@@ -95,7 +95,7 @@ async function fetchAllAdAccounts(accessToken: string) {
       currency: string
       timezone_name: string
       account_status: number
-      business?: string
+      business?: string | { id: string; name: string }
       business_name?: string
       spend_cap?: string
       created_time: string
@@ -105,8 +105,9 @@ async function fetchAllAdAccounts(accessToken: string) {
       // Try to fetch business profile picture if business ID is available
       if (account.business) {
         try {
-          iconUrl = await fetchBusinessProfilePicture(account.business, accessToken)
-          console.log(`Fetched icon for business ${account.business}: ${iconUrl}`)
+          const businessId = typeof account.business === 'object' ? account.business.id : account.business
+          iconUrl = await fetchBusinessProfilePicture(businessId, accessToken)
+          console.log(`Fetched icon for business ${businessId}: ${iconUrl}`)
         } catch (error) {
           console.log(`Could not fetch business icon for ${account.business}:`, error)
         }
