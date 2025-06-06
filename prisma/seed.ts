@@ -35,15 +35,15 @@ async function main() {
   // Create customer roles
   const customerAdminRole = await prisma.customerRole.create({
     data: {
-      name: 'Customer Admin',
-      description: 'Full access to customer account and can manage other users'
+      name: 'Owner',
+      description: 'Full access to organization account and can manage other users'
     }
   })
   console.log(`✅ Created customer role: ${customerAdminRole.name}`)
 
   const customerEditorRole = await prisma.customerRole.create({
     data: {
-      name: 'Customer Editor',
+      name: 'Editor',
       description: 'Can manage campaigns and view reports'
     }
   })
@@ -51,7 +51,7 @@ async function main() {
 
   const customerViewerRole = await prisma.customerRole.create({
     data: {
-      name: 'Customer Viewer',
+      name: 'Viewer',
       description: 'Read-only access to campaigns and reports'
     }
   })

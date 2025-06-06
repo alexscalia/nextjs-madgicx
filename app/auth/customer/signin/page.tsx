@@ -131,8 +131,8 @@ export default function CustomerSignIn() {
             <div className="mt-6 p-4 bg-gray-50 rounded-lg">
               <p className="text-sm font-medium text-gray-700 mb-2">Demo Accounts:</p>
               <div className="space-y-1 text-xs text-gray-600">
-                <p><strong>Acme Corp:</strong> john@acmecorp.com / jane@acmecorp.com / bob@acmecorp.com</p>
-                <p><strong>TechStartup:</strong> alice@techstartup.com / mike@techstartup.com</p>
+                <p><strong>Acme Corp:</strong> john@acmecorp.com (Owner) / jane@acmecorp.com (Editor) / bob@acmecorp.com (Viewer)</p>
+                <p><strong>TechStartup:</strong> alice@techstartup.com (Owner) / mike@techstartup.com (Editor)</p>
                 <p><strong>Password:</strong> password</p>
               </div>
             </div>
