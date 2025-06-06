@@ -95,6 +95,27 @@ export function ConnectedAccountCard({ account }: ConnectedAccountCardProps) {
     }
   }
 
+  const handleSyncCampaigns = async () => {
+    setIsLoading(true)
+    try {
+      const response = await fetch(`/api/customer/accounts/${account.id}/sync-campaigns`, {
+        method: 'POST'
+      })
+      if (response.ok) {
+        // Show success message
+        alert('Campaigns synced successfully! Visit the Campaigns page to see your data.')
+      } else {
+        const errorData = await response.json()
+        alert(`Sync failed: ${errorData.error}`)
+      }
+    } catch (error) {
+      console.error('Campaign sync failed:', error)
+      alert('Campaign sync failed. Please try again.')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
   const handleDisconnect = async () => {
     if (confirm(`Are you sure you want to disconnect ${account.accountName}?`)) {
       try {
@@ -146,8 +167,14 @@ export function ConnectedAccountCard({ account }: ConnectedAccountCardProps) {
             <DropdownMenuContent align="end">
               <DropdownMenuItem onClick={handleSync} disabled={!isConnected || isLoading}>
                 <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
-                Sync Now
+                Sync Account
               </DropdownMenuItem>
+              {account.platform === 'meta' && (
+                <DropdownMenuItem onClick={handleSyncCampaigns} disabled={!isConnected || isLoading}>
+                  <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
+                  Sync Campaigns
+                </DropdownMenuItem>
+              )}
               <DropdownMenuItem>
                 <Settings className="h-4 w-4 mr-2" />
                 Settings

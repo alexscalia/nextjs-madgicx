@@ -61,7 +61,7 @@ export function CustomerTopBar() {
         {/* Right side - User info and actions */}
         <div className="flex items-center gap-4">
           {/* Notifications */}
-          <Button variant="ghost" size="sm" className="relative">
+          <Button variant="ghost" size="sm" className="relative cursor-pointer">
             <Bell className="h-5 w-5 text-gray-600" />
             <span className="absolute -top-1 -right-1 h-3 w-3 bg-green-600 rounded-full text-xs"></span>
           </Button>
@@ -69,7 +69,7 @@ export function CustomerTopBar() {
           {/* User dropdown */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="flex items-center gap-3 px-3 py-2 h-auto hover:bg-gray-100">
+              <Button variant="ghost" className="flex items-center gap-3 px-3 py-2 h-auto hover:bg-gray-100 cursor-pointer">
                 <div className="flex items-center gap-3">
                   <Avatar className="h-8 w-8">
                     <AvatarFallback className="bg-green-600 text-white text-sm">
@@ -81,7 +81,7 @@ export function CustomerTopBar() {
                       {session?.user?.firstName || getFullName(session?.user)}
                     </p>
                     <Badge variant="outline" className="text-xs">
-                      {session?.user?.role || 'User'}
+                      {session?.user?.customerRole || 'User'}
                     </Badge>
                   </div>
                   <ChevronDown className="h-4 w-4 text-gray-500" />
@@ -89,24 +89,24 @@ export function CustomerTopBar() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
-              <DropdownMenuItem>
+              <DropdownMenuItem className="cursor-pointer">
                 <User className="h-4 w-4 mr-2" />
                 Edit Profile
               </DropdownMenuItem>
-              <DropdownMenuItem>
+              <DropdownMenuItem className="cursor-pointer">
                 <Mail className="h-4 w-4 mr-2" />
                 Inbox
               </DropdownMenuItem>
-              <DropdownMenuItem>
+              <DropdownMenuItem className="cursor-pointer">
                 <Calendar className="h-4 w-4 mr-2" />
                 Calendar
               </DropdownMenuItem>
-              <DropdownMenuItem>
+              <DropdownMenuItem className="cursor-pointer">
                 <Settings className="h-4 w-4 mr-2" />
                 Settings
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={handleSignOut} className="text-red-600">
+              <DropdownMenuItem onClick={handleSignOut} className="text-red-600 cursor-pointer">
                 <LogOut className="h-4 w-4 mr-2" />
                 Log Out
               </DropdownMenuItem>
