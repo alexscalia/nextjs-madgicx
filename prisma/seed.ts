@@ -61,8 +61,8 @@ async function main() {
   // Create customers (organizations)
   const acmeCustomer = await prisma.customer.create({
     data: {
-      name: 'Acme Corporation',
-      companyName: 'Acme Corp',
+      name: 'Acme', // Clean display name
+      companyName: 'Acme Corporation',
       plan: 'enterprise'
     }
   })
@@ -70,8 +70,8 @@ async function main() {
 
   const techStartupCustomer = await prisma.customer.create({
     data: {
-      name: 'Tech Startup Inc',
-      companyName: 'TechStartup',
+      name: 'TechStartup', // Clean display name
+      companyName: 'Tech Startup Inc',
       plan: 'pro'
     }
   })
@@ -79,18 +79,18 @@ async function main() {
 
   // Create additional customers to test pagination
   const additionalCustomers = [
-    { name: 'Global Solutions Ltd', companyName: 'Global Solutions', plan: 'basic' },
-    { name: 'Creative Agency Inc', companyName: 'Creative Agency', plan: 'pro' },
-    { name: 'Data Analytics Corp', companyName: 'Data Analytics', plan: 'enterprise' },
-    { name: 'Marketing Hub', companyName: 'Marketing Hub', plan: 'pro' },
-    { name: 'E-commerce Plus', companyName: 'E-commerce Plus', plan: 'basic' },
-    { name: 'Digital Transform', companyName: 'Digital Transform', plan: 'enterprise' },
-    { name: 'SaaS Solutions', companyName: 'SaaS Solutions', plan: 'pro' },
-    { name: 'Mobile Apps Co', companyName: 'Mobile Apps', plan: 'basic' },
-    { name: 'Cloud Services Ltd', companyName: 'Cloud Services', plan: 'enterprise' },
-    { name: 'AI Research Inc', companyName: 'AI Research', plan: 'pro' },
-    { name: 'Blockchain Tech', companyName: 'Blockchain Tech', plan: 'enterprise' },
-    { name: 'Social Media Co', companyName: 'Social Media', plan: 'basic' },
+    { name: 'Global Solutions', companyName: 'Global Solutions Ltd', plan: 'basic' },
+    { name: 'Creative Agency', companyName: 'Creative Agency Inc', plan: 'pro' },
+    { name: 'Data Analytics', companyName: 'Data Analytics Corp', plan: 'enterprise' },
+    { name: 'Marketing Hub', companyName: 'Marketing Hub Solutions', plan: 'pro' },
+    { name: 'E-commerce Plus', companyName: 'E-commerce Plus Ltd', plan: 'basic' },
+    { name: 'Digital Transform', companyName: 'Digital Transform Corp', plan: 'enterprise' },
+    { name: 'SaaS Solutions', companyName: 'SaaS Solutions Inc', plan: 'pro' },
+    { name: 'Mobile Apps', companyName: 'Mobile Apps Co', plan: 'basic' },
+    { name: 'Cloud Services', companyName: 'Cloud Services Ltd', plan: 'enterprise' },
+    { name: 'AI Research', companyName: 'AI Research Inc', plan: 'pro' },
+    { name: 'Blockchain Tech', companyName: 'Blockchain Tech Corp', plan: 'enterprise' },
+    { name: 'Social Media', companyName: 'Social Media Co', plan: 'basic' },
   ]
 
   const createdCustomers = [acmeCustomer, techStartupCustomer]

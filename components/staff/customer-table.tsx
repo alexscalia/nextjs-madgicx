@@ -45,6 +45,7 @@ interface Customer {
   email: string
   companyName: string
   plan: string
+  status: string
   createdAt: string
   updatedAt: string
 }
@@ -69,6 +70,7 @@ export function CustomerTable() {
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState("")
   const [planFilter, setPlanFilter] = useState("all")
+  const [statusFilter, setStatusFilter] = useState("all")
   const [currentPage, setCurrentPage] = useState(1)
   const [sortBy, setSortBy] = useState("createdAt")
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc")
@@ -76,7 +78,7 @@ export function CustomerTable() {
 
   useEffect(() => {
     fetchCustomers()
-  }, [currentPage, planFilter, sortBy, sortOrder])
+  }, [currentPage, planFilter, statusFilter, sortBy, sortOrder])
 
   // Debounce search
   useEffect(() => {
@@ -105,6 +107,7 @@ export function CustomerTable() {
     params.set('limit', '10')
     if (searchTerm) params.set('search', searchTerm)
     if (planFilter && planFilter !== 'all') params.set('plan', planFilter)
+    if (statusFilter && statusFilter !== 'all') params.set('status', statusFilter)
     params.set('sortBy', sortBy)
     params.set('sortOrder', sortOrder)
     
@@ -177,6 +180,21 @@ export function CustomerTable() {
     }
   }
 
+  const getStatusBadgeColor = (status: string) => {
+    switch (status.toLowerCase()) {
+      case 'active':
+        return 'bg-green-100 text-green-800'
+      case 'inactive':
+        return 'bg-gray-100 text-gray-800'
+      case 'suspended':
+        return 'bg-red-100 text-red-800'
+      case 'pending':
+        return 'bg-yellow-100 text-yellow-800'
+      default:
+        return 'bg-gray-100 text-gray-800'
+    }
+  }
+
   const SortIcon = ({ field }: { field: string }) => {
     if (sortBy !== field) return null
     return sortOrder === "asc" ? "↑" : "↓"
@@ -215,6 +233,19 @@ export function CustomerTable() {
               <SelectItem value="enterprise">Enterprise</SelectItem>
             </SelectContent>
           </Select>
+          
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <SelectTrigger className="w-[140px]">
+              <SelectValue placeholder="All Status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Status</SelectItem>
+              <SelectItem value="active">Active</SelectItem>
+              <SelectItem value="inactive">Inactive</SelectItem>
+              <SelectItem value="suspended">Suspended</SelectItem>
+              <SelectItem value="pending">Pending</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
         {pagination && (
@@ -247,7 +278,12 @@ export function CustomerTable() {
               >
                 Plan <SortIcon field="plan" />
               </TableHead>
-              <TableHead>Status</TableHead>
+              <TableHead 
+                className="cursor-pointer hover:bg-gray-50"
+                onClick={() => handleSort('status')}
+              >
+                Status <SortIcon field="status" />
+              </TableHead>
               <TableHead 
                 className="cursor-pointer hover:bg-gray-50"
                 onClick={() => handleSort('createdAt')}
@@ -267,7 +303,7 @@ export function CustomerTable() {
             ) : customers.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={6} className="text-center py-8 text-gray-500">
-                  {searchTerm || (planFilter && planFilter !== 'all') ? 'No customers found matching your criteria.' : 'No customers found.'}
+                  {searchTerm || (planFilter && planFilter !== 'all') || (statusFilter && statusFilter !== 'all') ? 'No customers found matching your criteria.' : 'No customers found.'}
                 </TableCell>
               </TableRow>
             ) : (
@@ -299,8 +335,8 @@ export function CustomerTable() {
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    <Badge variant="outline" className="bg-green-100 text-green-800">
-                      Active
+                    <Badge variant="outline" className={getStatusBadgeColor(customer.status)}>
+                      {customer.status}
                     </Badge>
                   </TableCell>
                   <TableCell>

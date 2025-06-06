@@ -46,7 +46,9 @@ export default async function CustomerDetailPage({ params }: PageProps) {
         },
         select: {
           id: true,
-          name: true,
+          firstName: true,
+          middleName: true,
+          lastName: true,
           email: true,
           status: true,
           createdAt: true,
@@ -139,12 +141,12 @@ export default async function CustomerDetailPage({ params }: PageProps) {
             <CardTitle className="flex items-center gap-3">
               <Avatar className="h-12 w-12">
                                  <AvatarFallback className="bg-blue-600 text-white text-lg">
-                   {customer.name ? customer.name.split(' ').map((n: string) => n[0]).join('').toUpperCase() : 'N/A'}
+                   {customer.companyName ? customer.companyName.split(' ').map((n: string) => n[0]).join('').toUpperCase() : 'N/A'}
                  </AvatarFallback>
               </Avatar>
               <div>
-                <div className="text-xl">{customer.name}</div>
-                <div className="text-sm text-gray-500 font-normal">{customer.companyName}</div>
+                <div className="text-xl">{customer.companyName}</div>
+                <div className="text-sm text-gray-500 font-normal">Customer ID: {customer.id.slice(0, 8)}...</div>
               </div>
             </CardTitle>
           </CardHeader>
@@ -247,12 +249,14 @@ export default async function CustomerDetailPage({ params }: PageProps) {
                   <div className="flex items-center gap-4">
                     <Avatar className="h-10 w-10">
                       <AvatarFallback className="bg-gray-600 text-white">
-                        {user.name ? user.name.split(' ').map((n: string) => n[0]).join('').toUpperCase() : 'U'}
+                        {user.firstName ? user.firstName[0].toUpperCase() : 'U'}
                       </AvatarFallback>
                     </Avatar>
                     <div className="flex-1">
                                              <div className="flex items-center gap-2">
-                         <span className="font-medium text-gray-900">{user.name || 'No Name'}</span>
+                         <span className="font-medium text-gray-900">
+                           {[user.firstName, user.middleName, user.lastName].filter(Boolean).join(' ') || 'No Name'}
+                         </span>
                          {user.role.name === 'Owner' && (
                            <div title="Account Owner">
                              <Shield className="h-4 w-4 text-blue-600" />

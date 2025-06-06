@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "../../auth/[...nextauth]/route"
-import { PrismaClient } from "../../../generated/prisma"
+import { PrismaClient, UserStatus } from "../../../generated/prisma"
 import bcrypt from 'bcryptjs'
 
 const prisma = new PrismaClient()
@@ -23,6 +23,7 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '10')
     const search = searchParams.get('search') || ''
     const plan = searchParams.get('plan') || ''
+    const status = searchParams.get('status') || ''
     const sortBy = searchParams.get('sortBy') || 'createdAt'
     const sortOrder = searchParams.get('sortOrder') || 'desc'
     
@@ -39,6 +40,7 @@ export async function GET(request: NextRequest) {
         companyName?: { contains: string; mode: 'insensitive' }
       }>
       plan?: string
+      status?: UserStatus
     } = {
       deletedAt: null
     }
@@ -56,8 +58,13 @@ export async function GET(request: NextRequest) {
       whereClause.plan = plan
     }
 
+    // Add status filter
+    if (status) {
+      whereClause.status = status as UserStatus
+    }
+
     // Build order by clause
-    const validSortFields = ['name', 'companyName', 'plan', 'createdAt', 'updatedAt']
+    const validSortFields = ['name', 'companyName', 'plan', 'status', 'createdAt', 'updatedAt']
     const sortDirection: 'asc' | 'desc' = sortOrder === 'asc' ? 'asc' : 'desc'
     const orderBy = validSortFields.includes(sortBy) 
       ? { [sortBy]: sortDirection }
@@ -72,6 +79,7 @@ export async function GET(request: NextRequest) {
           name: true,
           companyName: true,
           plan: true,
+          status: true,
           createdAt: true,
           updatedAt: true,
         },
@@ -117,7 +125,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { name, companyName, plan, ownerName, ownerEmail, ownerPassword } = body
+    const { name, companyName, plan, ownerFirstName, ownerLastName, ownerEmail, ownerPassword } = body
 
     // Enhanced validation
     const validationErrors: string[] = []
@@ -135,8 +143,12 @@ export async function POST(request: NextRequest) {
     }
 
     // Owner validation
-    if (!ownerName || typeof ownerName !== 'string' || ownerName.trim().length < 2) {
-      validationErrors.push("Owner name must be at least 2 characters long")
+    if (!ownerFirstName || typeof ownerFirstName !== 'string' || ownerFirstName.trim().length < 2) {
+      validationErrors.push("Owner first name must be at least 2 characters long")
+    }
+
+    if (!ownerLastName || typeof ownerLastName !== 'string' || ownerLastName.trim().length < 2) {
+      validationErrors.push("Owner last name must be at least 2 characters long")
     }
 
     if (!ownerEmail || typeof ownerEmail !== 'string') {
@@ -199,7 +211,8 @@ export async function POST(request: NextRequest) {
       // Create owner user
       const ownerUser = await tx.customerUser.create({
         data: {
-          name: ownerName.trim(),
+          firstName: ownerFirstName.trim(),
+          lastName: ownerLastName.trim(),
           email: ownerEmail.trim().toLowerCase(),
           customerId: customer.id,
           roleId: ownerRole.id,
@@ -217,7 +230,8 @@ export async function POST(request: NextRequest) {
       customer: result.customer,
       owner: {
         id: result.ownerUser.id,
-        name: result.ownerUser.name,
+        firstName: result.ownerUser.firstName,
+        lastName: result.ownerUser.lastName,
         email: result.ownerUser.email
       }
     }, { status: 201 })

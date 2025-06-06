@@ -11,7 +11,8 @@ import {
   Users, 
   Settings,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Plug
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -20,6 +21,11 @@ const navigation = [
     name: "Dashboard",
     href: "/customer/dashboard",
     icon: LayoutDashboard,
+  },
+  {
+    name: "Connected Accounts",
+    href: "/customer/accounts",
+    icon: Plug,
   },
   {
     name: "Campaigns",

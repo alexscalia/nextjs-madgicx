@@ -23,7 +23,7 @@ export default async function CustomerDashboardPage() {
     return <div>Unauthorized</div>
   }
 
-  // Fetch customer data with users
+  // Fetch customer data with customer users
   const customer = await prisma.customer.findUnique({
     where: {
       id: session.user.customerId,
@@ -31,9 +31,9 @@ export default async function CustomerDashboardPage() {
     },
     select: {
       id: true,
-      name: true,
       companyName: true,
       plan: true,
+      status: true,
       createdAt: true,
       users: {
         where: {
@@ -41,7 +41,8 @@ export default async function CustomerDashboardPage() {
         },
         select: {
           id: true,
-          name: true,
+          firstName: true,
+          lastName: true,
           email: true,
           status: true,
           role: {
@@ -86,7 +87,7 @@ export default async function CustomerDashboardPage() {
       {/* Header */}
       <div>
         <h1 className="text-3xl font-bold text-gray-900">Welcome back, {session.user.name}!</h1>
-        <p className="text-gray-600">Here's your account overview for {customer.companyName}</p>
+        <p className="text-gray-600">Here&apos;s your account overview for {customer.companyName}</p>
       </div>
 
       {/* Overview Cards */}
@@ -232,10 +233,12 @@ export default async function CustomerDashboardPage() {
             {customer.users.map((user) => (
               <div key={user.id} className="flex items-center gap-3 p-3 border rounded-lg">
                 <div className="h-8 w-8 bg-green-600 text-white rounded-full flex items-center justify-center text-sm font-medium">
-                  {user.name ? user.name[0].toUpperCase() : 'U'}
+                  {user.firstName ? user.firstName[0].toUpperCase() : 'U'}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="font-medium text-sm">{user.name || 'No Name'}</div>
+                  <div className="font-medium text-sm">
+                    {[user.firstName, user.lastName].filter(Boolean).join(' ') || 'No Name'}
+                  </div>
                   <div className="text-xs text-gray-500 truncate">{user.email}</div>
                   <div className="flex items-center gap-2 mt-1">
                     <Badge variant="outline" className="text-xs">
