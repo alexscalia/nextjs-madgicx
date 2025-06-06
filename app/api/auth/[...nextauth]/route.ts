@@ -109,7 +109,12 @@ const authOptions: NextAuthOptions = {
             return null
           }
 
-          // Check user status after password validation
+          // Check customer (company) status first - this overrides user status
+          if (customerUser.customer.status !== "ACTIVE") {
+            throw new Error(`COMPANY_${customerUser.customer.status}`)
+          }
+
+          // Check individual user status only if company is active
           if (customerUser.status !== "ACTIVE") {
             throw new Error(`ACCOUNT_${customerUser.status}`)
           }
@@ -127,7 +132,7 @@ const authOptions: NextAuthOptions = {
           }
         } catch (error) {
           console.error("Auth error:", error)
-          if (error instanceof Error && error.message.startsWith('ACCOUNT_')) {
+          if (error instanceof Error && error.message.startsWith('ACCOUNT_') || error instanceof Error && error.message.startsWith('COMPANY_')) {
             // Re-throw status errors to be handled by NextAuth
             throw error
           }
@@ -173,7 +178,12 @@ const authOptions: NextAuthOptions = {
             return null
           }
 
-          // Check user status after password validation
+          // Check customer (company) status first - this overrides subcustomer status
+          if (subCustomer.customer.status !== "ACTIVE") {
+            throw new Error(`COMPANY_${subCustomer.customer.status}`)
+          }
+
+          // Check individual subcustomer status only if company is active
           if (subCustomer.status !== "ACTIVE") {
             throw new Error(`ACCOUNT_${subCustomer.status}`)
           }
@@ -189,6 +199,10 @@ const authOptions: NextAuthOptions = {
           }
         } catch (error) {
           console.error("Auth error:", error)
+          if (error instanceof Error && error.message.startsWith('ACCOUNT_') || error instanceof Error && error.message.startsWith('COMPANY_')) {
+            // Re-throw status errors to be handled by NextAuth
+            throw error
+          }
           return null
         }
       }

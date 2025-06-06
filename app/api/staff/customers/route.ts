@@ -5,8 +5,8 @@ import bcrypt from "bcryptjs"
 
 const prisma = new PrismaClient()
 
-// GET /api/staff/customers - Get all customers
-export async function GET() {
+// GET /api/staff/customers - Get all customers with pagination, search, and filtering
+export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession()
     
@@ -15,26 +15,85 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const customers = await prisma.customer.findMany({
-      where: {
-        deletedAt: null
-      },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        companyName: true,
-        plan: true,
-        createdAt: true,
-        updatedAt: true,
-        // Don't include passwordHash in the response
-      },
-      orderBy: {
-        createdAt: 'desc'
+    const { searchParams } = new URL(request.url)
+    
+    // Parse query parameters
+    const page = parseInt(searchParams.get('page') || '1')
+    const limit = parseInt(searchParams.get('limit') || '10')
+    const search = searchParams.get('search') || ''
+    const plan = searchParams.get('plan') || ''
+    const sortBy = searchParams.get('sortBy') || 'createdAt'
+    const sortOrder = searchParams.get('sortOrder') || 'desc'
+    
+    // Validate pagination parameters
+    const validatedPage = Math.max(1, page)
+    const validatedLimit = Math.min(Math.max(1, limit), 100) // Max 100 per page
+    const skip = (validatedPage - 1) * validatedLimit
+
+    // Build where clause
+    const whereClause: any = {
+      deletedAt: null
+    }
+
+    // Add search functionality
+    if (search) {
+      whereClause.OR = [
+        { name: { contains: search, mode: 'insensitive' } },
+        { email: { contains: search, mode: 'insensitive' } },
+        { companyName: { contains: search, mode: 'insensitive' } }
+      ]
+    }
+
+    // Add plan filter
+    if (plan) {
+      whereClause.plan = plan
+    }
+
+    // Build order by clause
+    const validSortFields = ['name', 'email', 'companyName', 'plan', 'createdAt', 'updatedAt']
+    const sortDirection: 'asc' | 'desc' = sortOrder === 'asc' ? 'asc' : 'desc'
+    const orderBy = validSortFields.includes(sortBy) 
+      ? { [sortBy]: sortDirection }
+      : { createdAt: sortDirection }
+
+    // Get customers with pagination
+    const [customers, totalCount] = await Promise.all([
+      prisma.customer.findMany({
+        where: whereClause,
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          companyName: true,
+          plan: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+        orderBy,
+        skip,
+        take: validatedLimit
+      }),
+      prisma.customer.count({
+        where: whereClause
+      })
+    ])
+
+    // Calculate pagination info
+    const totalPages = Math.ceil(totalCount / validatedLimit)
+    const hasNextPage = validatedPage < totalPages
+    const hasPrevPage = validatedPage > 1
+
+    return NextResponse.json({
+      customers,
+      pagination: {
+        page: validatedPage,
+        limit: validatedLimit,
+        totalCount,
+        totalPages,
+        hasNextPage,
+        hasPrevPage
       }
     })
-
-    return NextResponse.json(customers)
   } catch (error) {
     console.error("Error fetching customers:", error)
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
@@ -54,17 +113,42 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const { name, email, companyName, plan, password } = body
 
-    // Validate required fields
-    if (!name || !email || !companyName || !plan || !password) {
+    // Enhanced validation
+    const validationErrors: string[] = []
+    
+    if (!name || typeof name !== 'string' || name.trim().length < 2) {
+      validationErrors.push("Name must be at least 2 characters long")
+    }
+    
+    if (!email || typeof email !== 'string' || !email.includes('@')) {
+      validationErrors.push("Valid email is required")
+    }
+    
+    if (!companyName || typeof companyName !== 'string' || companyName.trim().length < 2) {
+      validationErrors.push("Company name must be at least 2 characters long")
+    }
+    
+    if (!plan || typeof plan !== 'string') {
+      validationErrors.push("Plan is required")
+    }
+    
+    if (!password || typeof password !== 'string' || password.length < 8) {
+      validationErrors.push("Password must be at least 8 characters long")
+    }
+
+    if (validationErrors.length > 0) {
       return NextResponse.json(
-        { error: "Missing required fields" }, 
+        { error: "Validation failed", details: validationErrors }, 
         { status: 400 }
       )
     }
 
+    // Normalize email
+    const normalizedEmail = email.toLowerCase().trim()
+
     // Check if customer already exists
     const existingCustomer = await prisma.customer.findUnique({
-      where: { email }
+      where: { email: normalizedEmail }
     })
 
     if (existingCustomer && !existingCustomer.deletedAt) {
@@ -80,9 +164,9 @@ export async function POST(request: NextRequest) {
     // Create customer
     const customer = await prisma.customer.create({
       data: {
-        name,
-        email,
-        companyName,
+        name: name.trim(),
+        email: normalizedEmail,
+        companyName: companyName.trim(),
         plan,
         passwordHash,
         createdAt: new Date(),

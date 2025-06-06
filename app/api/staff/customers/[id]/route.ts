@@ -62,6 +62,36 @@ export async function PUT(
     const body = await request.json()
     const { name, email, companyName, plan, password } = body
 
+    // Enhanced validation
+    const validationErrors: string[] = []
+    
+    if (name !== undefined && (typeof name !== 'string' || name.trim().length < 2)) {
+      validationErrors.push("Name must be at least 2 characters long")
+    }
+    
+    if (email !== undefined && (typeof email !== 'string' || !email.includes('@'))) {
+      validationErrors.push("Valid email is required")
+    }
+    
+    if (companyName !== undefined && (typeof companyName !== 'string' || companyName.trim().length < 2)) {
+      validationErrors.push("Company name must be at least 2 characters long")
+    }
+    
+    if (plan !== undefined && typeof plan !== 'string') {
+      validationErrors.push("Plan must be a valid string")
+    }
+    
+    if (password !== undefined && (typeof password !== 'string' || password.length < 8)) {
+      validationErrors.push("Password must be at least 8 characters long")
+    }
+
+    if (validationErrors.length > 0) {
+      return NextResponse.json(
+        { error: "Validation failed", details: validationErrors }, 
+        { status: 400 }
+      )
+    }
+
     // Check if customer exists
     const existingCustomer = await prisma.customer.findUnique({
       where: {
@@ -74,10 +104,13 @@ export async function PUT(
       return NextResponse.json({ error: "Customer not found" }, { status: 404 })
     }
 
+    // Normalize email if provided
+    const normalizedEmail = email ? email.toLowerCase().trim() : undefined
+
     // Check if email is being changed and if it conflicts with another customer
-    if (email && email !== existingCustomer.email) {
+    if (normalizedEmail && normalizedEmail !== existingCustomer.email) {
       const emailConflict = await prisma.customer.findUnique({
-        where: { email }
+        where: { email: normalizedEmail }
       })
       
       if (emailConflict && !emailConflict.deletedAt && emailConflict.id !== params.id) {
@@ -93,10 +126,10 @@ export async function PUT(
       updatedAt: new Date()
     }
 
-    if (name) updateData.name = name
-    if (email) updateData.email = email
-    if (companyName) updateData.companyName = companyName
-    if (plan) updateData.plan = plan
+    if (name !== undefined) updateData.name = name.trim()
+    if (normalizedEmail !== undefined) updateData.email = normalizedEmail
+    if (companyName !== undefined) updateData.companyName = companyName.trim()
+    if (plan !== undefined) updateData.plan = plan
 
     // Hash new password if provided
     if (password) {

@@ -53,6 +53,24 @@ export function getAuthError(result: any): AuthError {
           message: 'Account pending approval',
           details: 'Your account is awaiting approval. Please wait for activation or contact support.'
         }
+      case 'COMPANY_INACTIVE':
+        return {
+          type: 'credentials',
+          message: 'Company account disabled',
+          details: 'Your company account is temporarily disabled. Please contact support for assistance.'
+        }
+      case 'COMPANY_SUSPENDED':
+        return {
+          type: 'credentials',
+          message: 'Company account suspended',
+          details: 'Your company account has been suspended. Please contact support immediately.'
+        }
+      case 'COMPANY_PENDING':
+        return {
+          type: 'credentials',
+          message: 'Company pending approval',
+          details: 'Your company account is awaiting approval. Please wait for activation or contact support.'
+        }
       case 'SessionRequired':
         return {
           type: 'credentials',

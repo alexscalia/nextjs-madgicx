@@ -2,7 +2,7 @@ import { PrismaClient } from "../app/generated/prisma"
 
 const prisma = new PrismaClient()
 
-export type UserType = 'staff' | 'customer' | 'subcustomer'
+export type UserType = 'staff' | 'customer' | 'subcustomer' | 'company'
 
 export interface UserStatusCheck {
   isActive: boolean
@@ -32,6 +32,12 @@ export async function checkUserStatus(userId: string, userType: UserType): Promi
         break
       case 'subcustomer':
         user = await prisma.subCustomer.findUnique({
+          where: { id: userId },
+          select: { status: true, deletedAt: true }
+        })
+        break
+      case 'company':
+        user = await prisma.customer.findUnique({
           where: { id: userId },
           select: { status: true, deletedAt: true }
         })
@@ -88,6 +94,12 @@ export async function updateUserStatus(userId: string, userType: UserType, statu
         break
       case 'subcustomer':
         await prisma.subCustomer.update({
+          where: { id: userId },
+          data: { status, updatedAt: new Date() }
+        })
+        break
+      case 'company':
+        await prisma.customer.update({
           where: { id: userId },
           data: { status, updatedAt: new Date() }
         })
