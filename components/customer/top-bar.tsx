@@ -48,17 +48,13 @@ export function CustomerTopBar() {
       <div className="flex items-center justify-between h-16 px-6">
         {/* Left side - Company info */}
         <div className="flex items-center">
-          <h1 className="text-2xl font-semibold text-gray-900">Madgicx</h1>
           {session?.user?.companyName && (
-            <>
-              <span className="mx-2 text-gray-300">|</span>
-              <div className="flex items-center gap-2">
-                <Building2 className="h-4 w-4 text-gray-500" />
-                <span className="text-sm font-medium text-gray-700">
-                  {session.user.companyName}
-                </span>
-              </div>
-            </>
+            <div className="flex items-center gap-2">
+              <Building2 className="h-4 w-4 text-gray-500" />
+              <span className="text-sm font-medium text-gray-700">
+                {session.user.companyName}
+              </span>
+            </div>
           )}
         </div>
 
