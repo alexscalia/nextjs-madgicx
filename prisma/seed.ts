@@ -62,8 +62,6 @@ async function main() {
     data: {
       name: 'Acme Corporation',
       companyName: 'Acme Corp',
-      email: 'admin@acmecorp.com', // This is just for administrative purposes
-      passwordHash: 'unused', // Customers don't authenticate directly
       plan: 'enterprise'
     }
   })
@@ -73,12 +71,36 @@ async function main() {
     data: {
       name: 'Tech Startup Inc',
       companyName: 'TechStartup',
-      email: 'admin@techstartup.com',
-      passwordHash: 'unused',
-      plan: 'professional'
+      plan: 'pro'
     }
   })
   console.log(`✅ Created customer: ${techStartupCustomer.companyName}`)
+
+  // Create additional customers to test pagination
+  const additionalCustomers = [
+    { name: 'Global Solutions Ltd', companyName: 'Global Solutions', plan: 'basic' },
+    { name: 'Creative Agency Inc', companyName: 'Creative Agency', plan: 'pro' },
+    { name: 'Data Analytics Corp', companyName: 'Data Analytics', plan: 'enterprise' },
+    { name: 'Marketing Hub', companyName: 'Marketing Hub', plan: 'pro' },
+    { name: 'E-commerce Plus', companyName: 'E-commerce Plus', plan: 'basic' },
+    { name: 'Digital Transform', companyName: 'Digital Transform', plan: 'enterprise' },
+    { name: 'SaaS Solutions', companyName: 'SaaS Solutions', plan: 'pro' },
+    { name: 'Mobile Apps Co', companyName: 'Mobile Apps', plan: 'basic' },
+    { name: 'Cloud Services Ltd', companyName: 'Cloud Services', plan: 'enterprise' },
+    { name: 'AI Research Inc', companyName: 'AI Research', plan: 'pro' },
+    { name: 'Blockchain Tech', companyName: 'Blockchain Tech', plan: 'enterprise' },
+    { name: 'Social Media Co', companyName: 'Social Media', plan: 'basic' },
+  ]
+
+  const createdCustomers = [acmeCustomer, techStartupCustomer]
+
+  for (const customerData of additionalCustomers) {
+    const customer = await prisma.customer.create({
+      data: customerData
+    })
+    createdCustomers.push(customer)
+    console.log(`✅ Created customer: ${customer.companyName}`)
+  }
 
   // Define staff users data
   const staffUsers = [
@@ -171,6 +193,33 @@ async function main() {
       password: 'password'
     }
   ]
+
+  // Add owner users for the additional customers
+  const additionalOwners = [
+    { email: 'admin@globalsolutions.com', name: 'Sarah Global', customer: createdCustomers[2] },
+    { email: 'owner@creativeagency.com', name: 'Mark Creative', customer: createdCustomers[3] },
+    { email: 'ceo@dataanalytics.com', name: 'Lisa Analytics', customer: createdCustomers[4] },
+    { email: 'founder@marketinghub.com', name: 'Tom Marketing', customer: createdCustomers[5] },
+    { email: 'admin@ecommerceplus.com', name: 'Emma Commerce', customer: createdCustomers[6] },
+    { email: 'cto@digitaltransform.com', name: 'Alex Digital', customer: createdCustomers[7] },
+    { email: 'lead@saassolutions.com', name: 'Chris SaaS', customer: createdCustomers[8] },
+    { email: 'dev@mobileapps.com', name: 'Jordan Mobile', customer: createdCustomers[9] },
+    { email: 'admin@cloudservices.com', name: 'Taylor Cloud', customer: createdCustomers[10] },
+    { email: 'researcher@airesearch.com', name: 'Sam AI', customer: createdCustomers[11] },
+    { email: 'founder@blockchaintech.com', name: 'Morgan Block', customer: createdCustomers[12] },
+    { email: 'manager@socialmedia.com', name: 'Casey Social', customer: createdCustomers[13] },
+  ]
+
+  // Add additional owners to the customer users array
+  additionalOwners.forEach(owner => {
+    customerUsers.push({
+      email: owner.email,
+      name: owner.name,
+      customerId: owner.customer.id,
+      roleId: customerAdminRole.id,
+      password: 'password'
+    })
+  })
 
   // Create customer users with hashed passwords
   for (const userData of customerUsers) {
