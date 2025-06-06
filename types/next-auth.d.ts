@@ -11,6 +11,8 @@ declare module "next-auth" {
       roleId?: string
       companyName?: string | null
       plan?: string | null
+      customerId?: string
+      customerRole?: string
     }
   }
 
@@ -22,6 +24,8 @@ declare module "next-auth" {
     roleId?: string
     companyName?: string | null
     plan?: string | null
+    customerId?: string
+    customerRole?: string
   }
 }
 
@@ -31,5 +35,7 @@ declare module "next-auth/jwt" {
     roleId?: string
     companyName?: string | null
     plan?: string | null
+    customerId?: string
+    customerRole?: string
   }
 } 
