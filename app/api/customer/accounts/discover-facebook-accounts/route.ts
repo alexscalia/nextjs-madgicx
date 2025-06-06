@@ -108,16 +108,37 @@ async function fetchAllAdAccounts(accessToken: string) {
         const businessId = typeof account.business === 'object' ? account.business.id : account.business
         try {
           iconUrl = await fetchPageProfilePicture(businessId, accessToken)
-          console.log(`Fetched page icon for business ${businessId}: ${iconUrl}`)
+          console.log(`✅ Fetched page icon for business ${businessId}: ${iconUrl}`)
         } catch (error) {
-          console.log(`Could not fetch page icon for ${businessId}:`, error)
+          console.log(`❌ Could not fetch page icon for ${businessId}:`, error)
           // Fallback to business picture if page picture fails
           try {
             iconUrl = await fetchBusinessProfilePicture(businessId, accessToken)
-            console.log(`Fallback: Fetched business icon for ${businessId}: ${iconUrl}`)
+            console.log(`🔄 Fallback: Fetched business icon for ${businessId}: ${iconUrl}`)
           } catch (fallbackError) {
-            console.log(`Could not fetch business icon either for ${businessId}:`, fallbackError)
+            console.log(`❌ Could not fetch business icon either for ${businessId}:`, fallbackError)
+            
+            // Last resort: try to get picture directly from ad account
+            try {
+              const adAccountPictureUrl = `https://graph.facebook.com/v18.0/${account.id}/picture?type=large&redirect=false&access_token=${accessToken}`
+              const adAccountResponse = await fetch(adAccountPictureUrl)
+              if (adAccountResponse.ok) {
+                const adAccountData = await adAccountResponse.json()
+                if (adAccountData.data && adAccountData.data.url && !adAccountData.data.is_silhouette) {
+                  iconUrl = adAccountData.data.url
+                  console.log(`🎯 Last resort: Found ad account picture: ${iconUrl}`)
+                }
+              }
+            } catch (adAccountError) {
+              console.log(`❌ Ad account picture also failed:`, adAccountError)
+            }
+            
+            console.log(`⚠️  No icon found for business ${businessId} - will show platform icon`)
           }
+        }
+
+        if (!iconUrl) {
+          console.log(`⚠️  Final result: No iconUrl for business ${businessId}`)
         }
       } else {
         console.log(`No business ID for account ${account.account_id}`)
