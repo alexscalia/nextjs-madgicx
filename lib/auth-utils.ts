@@ -29,6 +29,30 @@ export function getAuthError(result: any): AuthError {
           message: 'Access denied',
           details: 'You do not have permission to access this portal.'
         }
+      case 'AccountDisabled':
+        return {
+          type: 'credentials',
+          message: 'Account disabled',
+          details: 'Your account has been disabled. Please contact support for assistance.'
+        }
+      case 'ACCOUNT_INACTIVE':
+        return {
+          type: 'credentials',
+          message: 'Account temporarily disabled',
+          details: 'Your account is temporarily disabled. Please contact support for assistance.'
+        }
+      case 'ACCOUNT_SUSPENDED':
+        return {
+          type: 'credentials',
+          message: 'Account suspended',
+          details: 'Your account has been suspended due to policy violations. Please contact support.'
+        }
+      case 'ACCOUNT_PENDING':
+        return {
+          type: 'credentials',
+          message: 'Account pending approval',
+          details: 'Your account is awaiting approval. Please wait for activation or contact support.'
+        }
       case 'SessionRequired':
         return {
           type: 'credentials',

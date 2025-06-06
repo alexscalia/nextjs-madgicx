@@ -22,11 +22,11 @@ const authOptions: NextAuthOptions = {
         }
 
         try {
-          // Find staff user by email
-          const staffUser = await prisma.staffUser.findUnique({
+          // Find staff user by email (regardless of status)
+          const staffUser = await prisma.staffUser.findFirst({
             where: {
               email: credentials.email,
-              deletedAt: null // Only active users
+              deletedAt: null // Only non-deleted users
             },
             include: {
               role: true
@@ -37,7 +37,7 @@ const authOptions: NextAuthOptions = {
             return null
           }
 
-          // Verify password
+          // Verify password first
           const isValidPassword = await bcrypt.compare(
             credentials.password,
             staffUser.passwordHash
@@ -45,6 +45,11 @@ const authOptions: NextAuthOptions = {
 
           if (!isValidPassword) {
             return null
+          }
+
+          // Check user status after password validation
+          if (staffUser.status !== "ACTIVE") {
+            throw new Error(`ACCOUNT_${staffUser.status}`)
           }
 
           // Return user object
@@ -57,6 +62,10 @@ const authOptions: NextAuthOptions = {
           }
         } catch (error) {
           console.error("Auth error:", error)
+          if (error instanceof Error && error.message.startsWith('ACCOUNT_')) {
+            // Re-throw status errors to be handled by NextAuth
+            throw error
+          }
           return null
         }
       }
@@ -74,8 +83,8 @@ const authOptions: NextAuthOptions = {
         }
 
         try {
-          // Find customer user by email
-          const customerUser = await prisma.customerUser.findUnique({
+          // Find customer user by email (regardless of status)
+          const customerUser = await prisma.customerUser.findFirst({
             where: {
               email: credentials.email,
               deletedAt: null
@@ -90,7 +99,7 @@ const authOptions: NextAuthOptions = {
             return null
           }
 
-          // Verify password
+          // Verify password first
           const isValidPassword = await bcrypt.compare(
             credentials.password,
             customerUser.passwordHash
@@ -98,6 +107,11 @@ const authOptions: NextAuthOptions = {
 
           if (!isValidPassword) {
             return null
+          }
+
+          // Check user status after password validation
+          if (customerUser.status !== "ACTIVE") {
+            throw new Error(`ACCOUNT_${customerUser.status}`)
           }
 
           // Return user object
@@ -113,6 +127,10 @@ const authOptions: NextAuthOptions = {
           }
         } catch (error) {
           console.error("Auth error:", error)
+          if (error instanceof Error && error.message.startsWith('ACCOUNT_')) {
+            // Re-throw status errors to be handled by NextAuth
+            throw error
+          }
           return null
         }
       }
@@ -130,8 +148,8 @@ const authOptions: NextAuthOptions = {
         }
 
         try {
-          // Find sub-customer by email
-          const subCustomer = await prisma.subCustomer.findUnique({
+          // Find sub-customer by email (regardless of status)
+          const subCustomer = await prisma.subCustomer.findFirst({
             where: {
               email: credentials.email,
               deletedAt: null
@@ -145,7 +163,7 @@ const authOptions: NextAuthOptions = {
             return null
           }
 
-          // Verify password
+          // Verify password first
           const isValidPassword = await bcrypt.compare(
             credentials.password,
             subCustomer.passwordHash
@@ -153,6 +171,11 @@ const authOptions: NextAuthOptions = {
 
           if (!isValidPassword) {
             return null
+          }
+
+          // Check user status after password validation
+          if (subCustomer.status !== "ACTIVE") {
+            throw new Error(`ACCOUNT_${subCustomer.status}`)
           }
 
           // Return user object

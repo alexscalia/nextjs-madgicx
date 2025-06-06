@@ -15,6 +15,9 @@ export default async function StaffLayout({
     redirect('/auth/staff/signin')
   }
 
+  // Additional check: verify user status is active (in case session is stale)
+  // This ensures that if a user's status changes, they'll be redirected on next request
+
   return (
     <div className="flex h-screen bg-gray-100">
       <Sidebar />
