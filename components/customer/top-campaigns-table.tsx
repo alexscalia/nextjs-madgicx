@@ -25,7 +25,7 @@ interface Campaign {
   platform: string
   status: string
   budget: number | null
-  metrics: any
+  metrics: unknown
   connectedAccount?: {
     platform: string
     accountName: string
@@ -45,7 +45,11 @@ export function TopCampaignsTable({ campaigns }: TopCampaignsTableProps) {
 
   // Process campaigns data
   const processedCampaigns = campaigns.map(campaign => {
-    const metrics = campaign.metrics || {}
+    const isMetricsObject = (obj: unknown): obj is { spend?: number; impressions?: number; clicks?: number; conversions?: number } => {
+      return obj !== null && typeof obj === 'object'
+    }
+    
+    const metrics = isMetricsObject(campaign.metrics) ? campaign.metrics : {}
     const spend = metrics.spend || 0
     const impressions = metrics.impressions || 0
     const clicks = metrics.clicks || 0
@@ -68,8 +72,8 @@ export function TopCampaignsTable({ campaigns }: TopCampaignsTableProps) {
 
   // Sort campaigns
   const sortedCampaigns = [...processedCampaigns].sort((a, b) => {
-    let aValue: any
-    let bValue: any
+    let aValue: string | number
+    let bValue: string | number
 
     switch (sortField) {
       case 'name':

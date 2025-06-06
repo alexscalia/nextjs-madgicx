@@ -16,7 +16,26 @@ interface Campaign {
   id: string
   name: string
   date: Date
-  metrics: any
+  metrics: unknown
+}
+
+interface ChartDataPoint {
+  date: string
+  spend: number
+  impressions: number
+  clicks: number
+  conversions: number
+}
+
+interface TooltipProps {
+  active?: boolean
+  payload?: Array<{
+    color: string
+    name: string
+    value: number
+    dataKey: string
+  }>
+  label?: string
 }
 
 interface PerformanceChartProps {
@@ -25,11 +44,15 @@ interface PerformanceChartProps {
 
 export function PerformanceChart({ campaigns }: PerformanceChartProps) {
   // Process data for the chart
-  const processChartData = () => {
+  const processChartData = (): ChartDataPoint[] => {
+    const isMetricsObject = (obj: unknown): obj is { spend?: number; impressions?: number; clicks?: number; conversions?: number } => {
+      return obj !== null && typeof obj === 'object'
+    }
+    
     // Group campaigns by date and aggregate metrics
     const dataByDate = campaigns.reduce((acc, campaign) => {
       const dateKey = format(new Date(campaign.date), 'yyyy-MM-dd')
-      const metrics = campaign.metrics || {}
+      const metrics = isMetricsObject(campaign.metrics) ? campaign.metrics : {}
       
       if (!acc[dateKey]) {
         acc[dateKey] = {
@@ -47,12 +70,12 @@ export function PerformanceChart({ campaigns }: PerformanceChartProps) {
       acc[dateKey].conversions += metrics.conversions || 0
       
       return acc
-    }, {} as Record<string, any>)
+    }, {} as Record<string, ChartDataPoint>)
     
     // Convert to array and sort by date
     return Object.values(dataByDate)
-      .sort((a: any, b: any) => new Date(a.date).getTime() - new Date(b.date).getTime())
-      .map((item: any) => ({
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+      .map((item) => ({
         ...item,
         date: format(new Date(item.date), 'MMM dd')
       }))
@@ -60,12 +83,12 @@ export function PerformanceChart({ campaigns }: PerformanceChartProps) {
 
   const chartData = processChartData()
 
-  const CustomTooltip = ({ active, payload, label }: any) => {
+  const CustomTooltip = ({ active, payload, label }: TooltipProps) => {
     if (active && payload && payload.length) {
       return (
         <div className="bg-white p-3 border rounded-lg shadow-md">
           <p className="font-medium">{label}</p>
-          {payload.map((entry: any, index: number) => (
+          {payload.map((entry, index: number) => (
             <p key={index} style={{ color: entry.color }} className="text-sm">
               {entry.name}: {
                 entry.dataKey === 'spend' 

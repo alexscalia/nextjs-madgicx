@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
@@ -76,9 +76,44 @@ export function CustomerTable() {
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc")
   const [searchTimeout, setSearchTimeout] = useState<NodeJS.Timeout | null>(null)
 
+  const buildApiUrl = useCallback(() => {
+    const params = new URLSearchParams()
+    params.set('page', currentPage.toString())
+    params.set('limit', '10')
+    if (searchTerm) params.set('search', searchTerm)
+    if (planFilter && planFilter !== 'all') params.set('plan', planFilter)
+    if (statusFilter && statusFilter !== 'all') params.set('status', statusFilter)
+    params.set('sortBy', sortBy)
+    params.set('sortOrder', sortOrder)
+    
+    return `/api/staff/customers?${params.toString()}`
+  }, [currentPage, searchTerm, planFilter, statusFilter, sortBy, sortOrder])
+
+  const fetchCustomers = useCallback(async () => {
+    try {
+      setLoading(true)
+      const response = await fetch(buildApiUrl(), {
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+      if (response.ok) {
+        const apiData: ApiResponse = await response.json()
+        setData(apiData)
+      } else {
+        console.error('Failed to fetch customers:', response.statusText)
+      }
+    } catch (error) {
+      console.error('Failed to fetch customers:', error)
+    } finally {
+      setLoading(false)
+    }
+  }, [buildApiUrl])
+
   useEffect(() => {
     fetchCustomers()
-  }, [currentPage, planFilter, statusFilter, sortBy, sortOrder])
+  }, [fetchCustomers])
 
   // Debounce search
   useEffect(() => {
@@ -99,42 +134,7 @@ export function CustomerTable() {
     return () => {
       if (timeout) clearTimeout(timeout)
     }
-  }, [searchTerm])
-
-  const buildApiUrl = () => {
-    const params = new URLSearchParams()
-    params.set('page', currentPage.toString())
-    params.set('limit', '10')
-    if (searchTerm) params.set('search', searchTerm)
-    if (planFilter && planFilter !== 'all') params.set('plan', planFilter)
-    if (statusFilter && statusFilter !== 'all') params.set('status', statusFilter)
-    params.set('sortBy', sortBy)
-    params.set('sortOrder', sortOrder)
-    
-    return `/api/staff/customers?${params.toString()}`
-  }
-
-  const fetchCustomers = async () => {
-    try {
-      setLoading(true)
-      const response = await fetch(buildApiUrl(), {
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      })
-      if (response.ok) {
-        const apiData: ApiResponse = await response.json()
-        setData(apiData)
-      } else {
-        console.error('Failed to fetch customers:', response.statusText)
-      }
-    } catch (error) {
-      console.error('Failed to fetch customers:', error)
-    } finally {
-      setLoading(false)
-    }
-  }
+  }, [searchTerm, currentPage, fetchCustomers, searchTimeout])
 
   const handleDelete = async (customerId: string, customerName: string) => {
     if (confirm(`Are you sure you want to delete customer "${customerName}"? This action cannot be undone.`)) {

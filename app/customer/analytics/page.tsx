@@ -20,7 +20,8 @@ import {
   BarChart3,
   TrendingUp,
   DollarSign,
-      Eye,
+  Eye,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   MousePointer,
   Target,
   Download,

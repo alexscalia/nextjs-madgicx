@@ -94,16 +94,21 @@ export default async function CampaignsPage() {
   const getAggregateMetrics = () => {
     const totalCampaigns = campaigns.length
     const activeCampaigns = campaigns.filter(c => c.status.toLowerCase() === 'active').length
+    
+    const isMetricsObject = (obj: unknown): obj is { spend?: number; impressions?: number; clicks?: number } => {
+      return obj !== null && typeof obj === 'object'
+    }
+    
     const totalSpend = campaigns.reduce((sum, campaign) => {
-      const metrics = campaign.metrics as any
+      const metrics = isMetricsObject(campaign.metrics) ? campaign.metrics : {}
       return sum + (metrics?.spend || 0)
     }, 0)
     const totalImpressions = campaigns.reduce((sum, campaign) => {
-      const metrics = campaign.metrics as any
+      const metrics = isMetricsObject(campaign.metrics) ? campaign.metrics : {}
       return sum + (metrics?.impressions || 0)
     }, 0)
     const totalClicks = campaigns.reduce((sum, campaign) => {
-      const metrics = campaign.metrics as any
+      const metrics = isMetricsObject(campaign.metrics) ? campaign.metrics : {}
       return sum + (metrics?.clicks || 0)
     }, 0)
     
