@@ -64,7 +64,6 @@ export function CustomerSidebar() {
           {!collapsed && (
             <div>
               <h1 className="text-xl font-bold text-green-600">Madgicx</h1>
-              <p className="text-sm text-gray-500">Customer Portal</p>
             </div>
           )}
           <Button

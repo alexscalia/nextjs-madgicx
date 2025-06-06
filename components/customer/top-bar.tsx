@@ -49,7 +49,6 @@ export function CustomerTopBar() {
         {/* Left side - Company info */}
         <div className="flex items-center">
           <h1 className="text-2xl font-semibold text-gray-900">Madgicx</h1>
-          <span className="ml-2 text-sm text-gray-500">Customer Portal</span>
           {session?.user?.companyName && (
             <>
               <span className="mx-2 text-gray-300">|</span>
