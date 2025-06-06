@@ -2,6 +2,7 @@ import { redirect } from "next/navigation"
 import { getServerSession } from "next-auth"
 import { CustomerSidebar } from "@/components/customer/sidebar"
 import { CustomerTopBar } from "@/components/customer/top-bar"
+import { AccountProvider } from "@/lib/account-context"
 import { authOptions } from "../api/auth/[...nextauth]/route"
 
 export default async function CustomerLayout({
@@ -20,14 +21,16 @@ export default async function CustomerLayout({
   // This ensures that if a user's status changes, they'll be redirected on next request
 
   return (
-    <div className="flex h-screen bg-gray-100">
-      <CustomerSidebar />
-      <div className="flex-1 flex flex-col">
-        <CustomerTopBar />
-        <main className="flex-1 overflow-y-auto">
-          {children}
-        </main>
+    <AccountProvider>
+      <div className="flex h-screen bg-gray-100">
+        <CustomerSidebar />
+        <div className="flex-1 flex flex-col">
+          <CustomerTopBar />
+          <main className="flex-1 overflow-y-auto">
+            {children}
+          </main>
+        </div>
       </div>
-    </div>
+    </AccountProvider>
   )
 } 

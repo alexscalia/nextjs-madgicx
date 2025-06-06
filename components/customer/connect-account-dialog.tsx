@@ -27,6 +27,8 @@ import { Plus, Loader2, AlertCircle, Search, Building2 } from "lucide-react"
 
 interface ConnectAccountDialogProps {
   customerId: string
+  open?: boolean
+  onOpenChange?: (open: boolean) => void
 }
 
 const platforms = [
@@ -49,8 +51,10 @@ interface DiscoveredAccount {
   createdTime: string
 }
 
-export function ConnectAccountDialog({ customerId }: ConnectAccountDialogProps) {
-  const [open, setOpen] = useState(false)
+export function ConnectAccountDialog({ customerId, open: externalOpen, onOpenChange }: ConnectAccountDialogProps) {
+  const [internalOpen, setInternalOpen] = useState(false)
+  const open = externalOpen !== undefined ? externalOpen : internalOpen
+  const setOpen = onOpenChange || setInternalOpen
   const [isLoading, setIsLoading] = useState(false)
   const [isDiscovering, setIsDiscovering] = useState(false)
   const [error, setError] = useState<string | null>(null)

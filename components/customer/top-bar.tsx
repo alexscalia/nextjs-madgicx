@@ -21,12 +21,20 @@ import {
   Bell,
   Building2
 } from "lucide-react"
+import { AccountSelector } from "./account-selector"
+import { useState } from "react"
+import { ConnectAccountDialog } from "./connect-account-dialog"
 
 export function CustomerTopBar() {
   const { data: session } = useSession()
+  const [showConnectDialog, setShowConnectDialog] = useState(false)
 
   const handleSignOut = async () => {
     await signOut()
+  }
+
+  const handleNewAccount = () => {
+    setShowConnectDialog(true)
   }
 
   // Helper function to get full name
@@ -44,22 +52,26 @@ export function CustomerTopBar() {
   }
 
   return (
-    <div className="bg-white border-b border-gray-200 shadow-sm">
-      <div className="flex items-center justify-between h-16 px-6">
-        {/* Left side - Company info */}
-        <div className="flex items-center">
-          {session?.user?.companyName && (
-            <div className="flex items-center gap-2">
-              <Building2 className="h-4 w-4 text-gray-500" />
-              <span className="text-sm font-medium text-gray-700">
-                {session.user.companyName}
-              </span>
-            </div>
-          )}
-        </div>
+    <>
+      <div className="bg-white border-b border-gray-200 shadow-sm">
+        <div className="flex items-center justify-between h-16 px-6">
+          {/* Left side - Company Name */}
+          <div className="flex items-center gap-6">
+            {session?.user?.companyName && (
+              <div className="flex items-center gap-2">
+                <Building2 className="h-4 w-4 text-gray-500" />
+                <span className="text-sm font-medium text-gray-700">
+                  {session.user.companyName}
+                </span>
+              </div>
+            )}
+          </div>
 
-        {/* Right side - User info and actions */}
+        {/* Right side - Account selector, notifications, and user info */}
         <div className="flex items-center gap-4">
+          {/* Account Selector */}
+          <AccountSelector onNewAccount={handleNewAccount} />
+          
           {/* Notifications */}
           <Button variant="ghost" size="sm" className="relative cursor-pointer">
             <Bell className="h-5 w-5 text-gray-600" />
@@ -114,6 +126,14 @@ export function CustomerTopBar() {
           </DropdownMenu>
         </div>
       </div>
-    </div>
+      </div>
+
+      {/* Connect Account Dialog */}
+      <ConnectAccountDialog 
+        customerId={session?.user?.customerId || ''}
+        open={showConnectDialog}
+        onOpenChange={setShowConnectDialog}
+      />
+    </>
   )
 } 
