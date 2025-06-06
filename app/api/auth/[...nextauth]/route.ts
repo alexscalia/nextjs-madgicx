@@ -221,6 +221,16 @@ const authOptions: NextAuthOptions = {
     strategy: "jwt" as const
   },
   callbacks: {
+    async redirect({ url, baseUrl }) {
+      // Always use the current origin for redirects
+      if (url.startsWith("/")) return `${baseUrl}${url}`
+      if (new URL(url).origin === baseUrl) return url
+      // Default signout redirect based on the current path or user type
+      if (url === baseUrl) {
+        return `${baseUrl}/auth/signin`
+      }
+      return baseUrl
+    },
     async jwt({ token, user }) {
       if (user) {
         token.firstName = user.firstName

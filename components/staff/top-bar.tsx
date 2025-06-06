@@ -25,7 +25,7 @@ export function TopBar() {
   const { data: session } = useSession()
 
   const handleSignOut = async () => {
-    await signOut({ callbackUrl: "/auth/staff/signin" })
+    await signOut()
   }
 
   // Helper function to get full name

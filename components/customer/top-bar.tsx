@@ -26,7 +26,7 @@ export function CustomerTopBar() {
   const { data: session } = useSession()
 
   const handleSignOut = async () => {
-    await signOut({ callbackUrl: "/auth/customer/signin" })
+    await signOut()
   }
 
   // Helper function to get full name
