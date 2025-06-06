@@ -11,7 +11,7 @@ import Link from "next/link"
 const prisma = new PrismaClient()
 
 interface PageProps {
-  params: { id: string }
+  params: Promise<{ id: string }>
 }
 
 export default async function EditCustomerPage({ params }: PageProps) {
@@ -34,7 +34,6 @@ export default async function EditCustomerPage({ params }: PageProps) {
     select: {
       id: true,
       name: true,
-      email: true,
       companyName: true,
       plan: true,
       createdAt: true,
@@ -48,18 +47,20 @@ export default async function EditCustomerPage({ params }: PageProps) {
 
   return (
     <div className="p-6 space-y-6">
-      {/* Header */}
-      <div className="flex items-center gap-4">
+      {/* Breadcrumb Navigation */}
+      <div className="mb-4">
         <Link href={`/staff/customers/${id}`}>
-          <Button variant="ghost" size="sm">
+          <Button variant="ghost" size="sm" className="text-gray-600 hover:text-gray-900 px-0">
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Customer
           </Button>
         </Link>
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Edit Customer</h1>
-          <p className="text-gray-600">Update customer information for {customer.name}</p>
-        </div>
+      </div>
+
+      {/* Header */}
+      <div>
+        <h1 className="text-3xl font-bold text-gray-900">Edit Customer</h1>
+        <p className="text-gray-600">Update customer information for {customer.name}</p>
       </div>
 
       {/* Form */}

@@ -13,7 +13,7 @@ import Link from "next/link"
 const prisma = new PrismaClient()
 
 interface PageProps {
-  params: { id: string }
+  params: Promise<{ id: string }>
 }
 
 export default async function CustomerDetailPage({ params }: PageProps) {
@@ -36,7 +36,6 @@ export default async function CustomerDetailPage({ params }: PageProps) {
     select: {
       id: true,
       name: true,
-      email: true,
       companyName: true,
       plan: true,
       createdAt: true,
@@ -49,7 +48,7 @@ export default async function CustomerDetailPage({ params }: PageProps) {
       <div className="p-6">
         <div className="text-center py-12">
           <h1 className="text-2xl font-bold text-gray-900 mb-4">Customer Not Found</h1>
-          <p className="text-gray-600 mb-6">The customer you're looking for doesn't exist or has been deleted.</p>
+                      <p className="text-gray-600 mb-6">The customer you&apos;re looking for doesn&apos;t exist or has been deleted.</p>
           <Link href="/staff/customers">
             <Button>
               <ArrowLeft className="h-4 w-4 mr-2" />
@@ -76,19 +75,21 @@ export default async function CustomerDetailPage({ params }: PageProps) {
 
   return (
     <div className="p-6 space-y-6">
+      {/* Breadcrumb Navigation */}
+      <div className="mb-4">
+        <Link href="/staff/customers">
+          <Button variant="ghost" size="sm" className="text-gray-600 hover:text-gray-900 px-0">
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Customers
+          </Button>
+        </Link>
+      </div>
+
       {/* Header */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Link href="/staff/customers">
-            <Button variant="ghost" size="sm">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Customers
-            </Button>
-          </Link>
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">Customer Details</h1>
-            <p className="text-gray-600">View and manage customer information</p>
-          </div>
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Customer Details</h1>
+          <p className="text-gray-600">View and manage customer information</p>
         </div>
         
         <div className="flex items-center gap-2">
@@ -118,20 +119,12 @@ export default async function CustomerDetailPage({ params }: PageProps) {
               </Avatar>
               <div>
                 <div className="text-xl">{customer.name}</div>
-                <div className="text-sm text-gray-500 font-normal">{customer.email}</div>
+                <div className="text-sm text-gray-500 font-normal">{customer.companyName}</div>
               </div>
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                <Mail className="h-5 w-5 text-gray-500" />
-                <div>
-                  <div className="text-sm font-medium text-gray-700">Email Address</div>
-                  <div className="text-sm text-gray-900">{customer.email}</div>
-                </div>
-              </div>
-              
               <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
                 <Building2 className="h-5 w-5 text-gray-500" />
                 <div>
