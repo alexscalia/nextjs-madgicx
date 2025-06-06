@@ -106,9 +106,12 @@ async function fetchAllAdAccounts(accessToken: string) {
       if (account.business) {
         try {
           iconUrl = await fetchBusinessProfilePicture(account.business, accessToken)
+          console.log(`Fetched icon for business ${account.business}: ${iconUrl}`)
         } catch (error) {
           console.log(`Could not fetch business icon for ${account.business}:`, error)
         }
+      } else {
+        console.log(`No business ID for account ${account.account_id}`)
       }
 
       return {
@@ -237,20 +240,25 @@ async function fetchBusinessAdAccounts(accessToken: string) {
 async function fetchBusinessProfilePicture(businessId: string, accessToken: string): Promise<string | null> {
   try {
     const pictureUrl = `https://graph.facebook.com/v18.0/${businessId}/picture?type=large&redirect=false&access_token=${accessToken}`
+    console.log(`Fetching business picture from: ${pictureUrl}`)
     
     const response = await fetch(pictureUrl)
     
     if (!response.ok) {
+      console.log(`Facebook API error: ${response.status} ${response.statusText}`)
       throw new Error('Failed to fetch business picture')
     }
 
     const data = await response.json()
+    console.log(`Facebook picture response:`, data)
     
     // Facebook returns the actual picture URL in the data.url field when redirect=false
     if (data.data && data.data.url && !data.data.is_silhouette) {
+      console.log(`Found business picture URL: ${data.data.url}`)
       return data.data.url
     }
     
+    console.log(`No picture found for business ${businessId} (silhouette or no data)`)
     return null
   } catch (error) {
     console.log('Error fetching business profile picture:', error)

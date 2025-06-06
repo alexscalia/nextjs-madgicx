@@ -334,6 +334,16 @@ export function ConnectAccountDialog({ customerId, open: externalOpen, onOpenCha
                                         {account.status === 1 ? 'Active' : 'Inactive'}
                                       </Badge>
                                     </div>
+                                    {account.iconUrl && (
+                                      <div className="mt-2 text-xs text-gray-500 font-mono truncate">
+                                        <span className="font-medium">Icon URL:</span> {account.iconUrl}
+                                      </div>
+                                    )}
+                                    {account.business && (
+                                      <div className="mt-1 text-xs text-gray-500">
+                                        <span className="font-medium">Business ID:</span> {account.business}
+                                      </div>
+                                    )}
                                   </div>
                                 </div>
                               </div>
