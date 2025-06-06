@@ -1,6 +1,6 @@
 import { getServerSession } from "next-auth"
 import { authOptions } from "../../api/auth/[...nextauth]/route"
-import { PrismaClient } from "@prisma/client"
+import { PrismaClient } from "../../generated/prisma"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { ConnectedAccountCard } from "../../../components/customer/connected-account-card"
 import { ConnectAccountDialog } from "../../../components/customer/connect-account-dialog"
