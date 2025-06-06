@@ -12,6 +12,7 @@ interface ConnectedAccount {
   expiresAt?: Date | null
   isActive: boolean
   currency?: string
+  iconUrl?: string
   createdAt: Date
   updatedAt: Date
 }

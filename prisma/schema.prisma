@@ -126,6 +126,7 @@ model ConnectedAccount {
   refreshToken   String?
   accountId      String
   accountName    String
+  iconUrl        String?  // URL to business/brand icon
   syncedAt       DateTime?
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt

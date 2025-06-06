@@ -27,6 +27,7 @@ interface ConnectedAccount {
   accountName: string
   accessToken: string | null
   refreshToken: string | null
+  iconUrl?: string | null
   syncedAt: Date | null
   createdAt: Date
   updatedAt: Date
@@ -147,11 +148,32 @@ export function ConnectedAccountCard({ account }: ConnectedAccountCardProps) {
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className={`w-10 h-10 rounded-lg ${platformInfo.color} flex items-center justify-center`}>
-              <span className="text-white font-bold text-sm">
-                {platformInfo.name.substring(0, 2).toUpperCase()}
-              </span>
-            </div>
+            {account.iconUrl ? (
+              <div className="w-10 h-10 rounded-lg overflow-hidden bg-gray-100 border border-gray-200">
+                <img 
+                  src={account.iconUrl} 
+                  alt="Business logo" 
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    // Fallback to platform icon if image fails to load
+                    const target = e.target as HTMLImageElement
+                    target.style.display = 'none'
+                  }}
+                />
+                {/* Fallback platform icon */}
+                <div className={`w-10 h-10 rounded-lg ${platformInfo.color} flex items-center justify-center`} style={{ marginTop: '-100%' }}>
+                  <span className="text-white font-bold text-sm">
+                    {platformInfo.name.substring(0, 2).toUpperCase()}
+                  </span>
+                </div>
+              </div>
+            ) : (
+              <div className={`w-10 h-10 rounded-lg ${platformInfo.color} flex items-center justify-center`}>
+                <span className="text-white font-bold text-sm">
+                  {platformInfo.name.substring(0, 2).toUpperCase()}
+                </span>
+              </div>
+            )}
             <div>
               <CardTitle className="text-sm font-medium">{platformInfo.name}</CardTitle>
               <p className="text-xs text-gray-500">{account.accountName}</p>

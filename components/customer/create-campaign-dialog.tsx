@@ -52,6 +52,7 @@ interface ConnectedAccount {
   id: string
   platform: string
   accountName: string
+  iconUrl?: string
 }
 
 interface CreateCampaignDialogProps {

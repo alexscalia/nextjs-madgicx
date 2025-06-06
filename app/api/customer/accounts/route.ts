@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const { platform, accountId, accountName, accessToken } = await request.json()
+    const { platform, accountId, accountName, accessToken, iconUrl } = await request.json()
 
     // Validate required fields
     if (!platform || !accountId || !accountName || !accessToken) {
@@ -82,6 +82,7 @@ export async function POST(request: NextRequest) {
         accountId,
         accountName,
         accessToken,
+        iconUrl,
         createdAt: new Date(),
         updatedAt: new Date()
       }

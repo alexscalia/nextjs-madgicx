@@ -49,6 +49,7 @@ interface DiscoveredAccount {
   businessName?: string
   spendCap?: string
   createdTime: string
+  iconUrl?: string
 }
 
 export function ConnectAccountDialog({ customerId, open: externalOpen, onOpenChange }: ConnectAccountDialogProps) {
@@ -65,7 +66,8 @@ export function ConnectAccountDialog({ customerId, open: externalOpen, onOpenCha
     platform: '',
     accountId: '',
     accountName: '',
-    accessToken: ''
+    accessToken: '',
+    iconUrl: ''
   })
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -151,7 +153,8 @@ export function ConnectAccountDialog({ customerId, open: externalOpen, onOpenCha
       platform: 'meta',
       accountId: account.accountId,
       accountName: account.businessName ? `${account.name} (${account.businessName})` : account.name,
-      accessToken: discoveryToken
+      accessToken: discoveryToken,
+      iconUrl: account.iconUrl || ''
     })
     setShowDiscoveryMode(false)
   }
@@ -161,7 +164,8 @@ export function ConnectAccountDialog({ customerId, open: externalOpen, onOpenCha
       platform: '',
       accountId: '',
       accountName: '',
-      accessToken: ''
+      accessToken: '',
+      iconUrl: ''
     })
     setDiscoveredAccounts([])
     setShowDiscoveryMode(false)
@@ -283,27 +287,53 @@ export function ConnectAccountDialog({ customerId, open: externalOpen, onOpenCha
                           >
                             <CardContent className="p-3">
                               <div className="flex items-center justify-between">
-                                <div className="flex-1">
-                                  <div className="font-medium text-sm">{account.name}</div>
-                                  {account.businessName && (
-                                    <div className="flex items-center gap-1 text-xs text-gray-500">
-                                      <Building2 className="h-3 w-3" />
-                                      {account.businessName}
+                                <div className="flex items-center gap-3 flex-1">
+                                  {/* Business Icon */}
+                                  {account.iconUrl ? (
+                                    <div className="w-10 h-10 rounded-lg overflow-hidden bg-gray-100 border border-gray-200 flex-shrink-0">
+                                      <img 
+                                        src={account.iconUrl} 
+                                        alt="Business logo" 
+                                        className="w-full h-full object-cover"
+                                        onError={(e) => {
+                                          // Fallback to platform icon if image fails to load
+                                          const target = e.target as HTMLImageElement
+                                          target.style.display = 'none'
+                                        }}
+                                      />
+                                      {/* Fallback platform icon */}
+                                      <div className="w-10 h-10 rounded-lg bg-blue-600 flex items-center justify-center" style={{ marginTop: '-100%' }}>
+                                        <span className="text-white font-bold text-xs">f</span>
+                                      </div>
+                                    </div>
+                                  ) : (
+                                    <div className="w-10 h-10 rounded-lg bg-blue-600 flex items-center justify-center flex-shrink-0">
+                                      <span className="text-white font-bold text-xs">f</span>
                                     </div>
                                   )}
-                                  <div className="flex items-center gap-2 mt-1">
-                                    <Badge variant="outline" className="text-xs">
-                                      ID: {account.accountId}
-                                    </Badge>
-                                    <Badge variant="outline" className="text-xs">
-                                      {account.currency}
-                                    </Badge>
-                                    <Badge 
-                                      variant={account.status === 1 ? "default" : "secondary"}
-                                      className="text-xs"
-                                    >
-                                      {account.status === 1 ? 'Active' : 'Inactive'}
-                                    </Badge>
+                                  
+                                  <div className="flex-1 min-w-0">
+                                    <div className="font-medium text-sm">{account.name}</div>
+                                    {account.businessName && (
+                                      <div className="flex items-center gap-1 text-xs text-gray-500">
+                                        <Building2 className="h-3 w-3" />
+                                        {account.businessName}
+                                      </div>
+                                    )}
+                                    <div className="flex items-center gap-2 mt-1">
+                                      <Badge variant="outline" className="text-xs">
+                                        ID: {account.accountId}
+                                      </Badge>
+                                      <Badge variant="outline" className="text-xs">
+                                        {account.currency}
+                                      </Badge>
+                                      <Badge 
+                                        variant={account.status === 1 ? "default" : "secondary"}
+                                        className="text-xs"
+                                      >
+                                        {account.status === 1 ? 'Active' : 'Inactive'}
+                                      </Badge>
+                                    </div>
                                   </div>
                                 </div>
                               </div>

@@ -22,6 +22,7 @@ interface ConnectedAccount {
   expiresAt?: Date | null
   isActive: boolean
   currency?: string
+  iconUrl?: string
   createdAt: Date
   updatedAt: Date
 }
@@ -62,7 +63,35 @@ export function AccountSelector({ onNewAccount }: AccountSelectorProps) {
     account.accountName.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
-  const getPlatformIcon = (platform: string) => {
+  const getPlatformIcon = (platform: string, iconUrl?: string) => {
+    // If we have a business icon URL, use it with fallback
+    if (iconUrl) {
+      return (
+        <div className="w-8 h-8 rounded-full overflow-hidden bg-gray-100 border border-gray-200">
+          <img 
+            src={iconUrl} 
+            alt="Business logo" 
+            className="w-full h-full object-cover"
+            onError={(e) => {
+              // Hide the image and show the fallback
+              const target = e.target as HTMLImageElement
+              target.style.display = 'none'
+              // The fallback will be shown by the next element
+            }}
+          />
+          {/* Fallback icon - hidden when image loads successfully */}
+          <div className="w-full h-full flex items-center justify-center" style={{ marginTop: '-100%' }}>
+            {getPlatformFallbackIcon(platform)}
+          </div>
+        </div>
+      )
+    }
+
+    // Return platform icon directly
+    return getPlatformFallbackIcon(platform)
+  }
+
+  const getPlatformFallbackIcon = (platform: string) => {
     switch (platform.toLowerCase()) {
       case 'meta':
       case 'facebook':
@@ -128,7 +157,7 @@ export function AccountSelector({ onNewAccount }: AccountSelectorProps) {
         >
           {selectedAccount ? (
             <>
-              {getPlatformIcon(selectedAccount.platform)}
+              {getPlatformIcon(selectedAccount.platform, selectedAccount.iconUrl)}
               <div className="flex-1">
                 <div className="font-medium text-gray-900 truncate">
                   {selectedAccount.accountName}
@@ -181,7 +210,7 @@ export function AccountSelector({ onNewAccount }: AccountSelectorProps) {
                 selectedAccount?.id === account.id && "bg-blue-50 border-r-2 border-blue-500"
               )}
             >
-              {getPlatformIcon(account.platform)}
+              {getPlatformIcon(account.platform, account.iconUrl)}
               <div className="flex-1 min-w-0">
                 <div className="font-medium text-gray-900 truncate">
                   {account.accountName}

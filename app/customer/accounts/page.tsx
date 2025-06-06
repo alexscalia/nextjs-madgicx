@@ -19,6 +19,7 @@ interface ConnectedAccount {
   accountName: string
   accessToken: string | null
   refreshToken: string | null
+  iconUrl?: string | null
   syncedAt: Date | null
   deletedAt: Date | null
   createdAt: Date

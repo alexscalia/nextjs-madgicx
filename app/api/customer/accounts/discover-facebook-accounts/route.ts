@@ -13,6 +13,7 @@ interface DiscoveredAccount {
   businessName?: string
   spendCap?: string
   createdTime: string
+  iconUrl?: string
 }
 
 // POST /api/customer/accounts/discover-facebook-accounts - Discover all Facebook ad accounts accessible by a token
@@ -86,8 +87,8 @@ async function fetchAllAdAccounts(accessToken: string) {
     const data = await response.json()
     const accounts = data.data || []
 
-    // Process and format the accounts
-    const formattedAccounts = accounts.map((account: {
+    // Process and format the accounts with business icons
+    const formattedAccounts = await Promise.all(accounts.map(async (account: {
       id: string
       account_id: string
       name: string
@@ -98,17 +99,31 @@ async function fetchAllAdAccounts(accessToken: string) {
       business_name?: string
       spend_cap?: string
       created_time: string
-    }) => ({
-      facebookId: account.id,
-      accountId: account.account_id,
-      name: account.name,
-      currency: account.currency,
-      timezone: account.timezone_name,
-      status: account.account_status,
-      business: account.business,
-      businessName: account.business_name,
-      spendCap: account.spend_cap,
-      createdTime: account.created_time
+    }) => {
+      let iconUrl = null
+      
+      // Try to fetch business profile picture if business ID is available
+      if (account.business) {
+        try {
+          iconUrl = await fetchBusinessProfilePicture(account.business, accessToken)
+        } catch (error) {
+          console.log(`Could not fetch business icon for ${account.business}:`, error)
+        }
+      }
+
+      return {
+        facebookId: account.id,
+        accountId: account.account_id,
+        name: account.name,
+        currency: account.currency,
+        timezone: account.timezone_name,
+        status: account.account_status,
+        business: account.business,
+        businessName: account.business_name,
+        spendCap: account.spend_cap,
+        createdTime: account.created_time,
+        iconUrl
+      }
     }))
 
     // Also try to get business accounts if the token has business permissions
@@ -169,7 +184,7 @@ async function fetchBusinessAdAccounts(accessToken: string) {
           const accountsData = await accountsResponse.json()
           const accounts = accountsData.data || []
           
-          const formattedAccounts = accounts.map((account: {
+          const formattedAccounts = await Promise.all(accounts.map(async (account: {
             id: string
             account_id: string
             name: string
@@ -178,17 +193,29 @@ async function fetchBusinessAdAccounts(accessToken: string) {
             account_status: number
             spend_cap?: string
             created_time: string
-          }) => ({
-            facebookId: account.id,
-            accountId: account.account_id,
-            name: account.name,
-            currency: account.currency,
-            timezone: account.timezone_name,
-            status: account.account_status,
-            business: business.id,
-            businessName: business.name,
-            spendCap: account.spend_cap,
-            createdTime: account.created_time
+          }) => {
+            let iconUrl = null
+            
+            // Try to fetch business profile picture
+            try {
+              iconUrl = await fetchBusinessProfilePicture(business.id, accessToken)
+            } catch (error) {
+              console.log(`Could not fetch business icon for ${business.id}:`, error)
+            }
+
+            return {
+              facebookId: account.id,
+              accountId: account.account_id,
+              name: account.name,
+              currency: account.currency,
+              timezone: account.timezone_name,
+              status: account.account_status,
+              business: business.id,
+              businessName: business.name,
+              spendCap: account.spend_cap,
+              createdTime: account.created_time,
+              iconUrl
+            }
           }))
 
           allAccounts.push(...formattedAccounts)
@@ -203,5 +230,30 @@ async function fetchBusinessAdAccounts(accessToken: string) {
   } catch (error) {
     console.error('Error fetching business ad accounts:', error)
     throw error
+  }
+}
+
+// Fetch business profile picture
+async function fetchBusinessProfilePicture(businessId: string, accessToken: string): Promise<string | null> {
+  try {
+    const pictureUrl = `https://graph.facebook.com/v18.0/${businessId}/picture?type=large&redirect=false&access_token=${accessToken}`
+    
+    const response = await fetch(pictureUrl)
+    
+    if (!response.ok) {
+      throw new Error('Failed to fetch business picture')
+    }
+
+    const data = await response.json()
+    
+    // Facebook returns the actual picture URL in the data.url field when redirect=false
+    if (data.data && data.data.url && !data.data.is_silhouette) {
+      return data.data.url
+    }
+    
+    return null
+  } catch (error) {
+    console.log('Error fetching business profile picture:', error)
+    return null
   }
 } 
