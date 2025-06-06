@@ -64,7 +64,7 @@ export default function CustomerSignIn() {
             Customer Portal
           </h2>
           <p className="mt-2 text-sm text-gray-600">
-            Access your marketing campaigns and analytics
+            Sign in to access your organization's campaigns and analytics
           </p>
         </div>
 
@@ -72,26 +72,26 @@ export default function CustomerSignIn() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <TrendingUp className="h-5 w-5" />
-              Customer Login
+              Customer User Login
             </CardTitle>
             <CardDescription>
-              Sign in to manage your marketing campaigns
+              Sign in with your individual user account
             </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="mb-4">
               <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
-                Business Account
+                Organization Member
               </Badge>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="email">Business Email</Label>
+                <Label htmlFor="email">Your Email</Label>
                 <Input
                   id="email"
                   type="email"
-                  placeholder="your.email@company.com"
+                  placeholder="your.name@company.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
@@ -128,11 +128,13 @@ export default function CustomerSignIn() {
               </Button>
             </form>
 
-            <div className="mt-6 p-4 bg-amber-50 border border-amber-200 rounded-lg">
-              <p className="text-sm font-medium text-amber-800 mb-1">No Account Yet?</p>
-              <p className="text-xs text-amber-700">
-                Contact our sales team to set up your Madgicx account and start optimizing your campaigns.
-              </p>
+            <div className="mt-6 p-4 bg-gray-50 rounded-lg">
+              <p className="text-sm font-medium text-gray-700 mb-2">Demo Accounts:</p>
+              <div className="space-y-1 text-xs text-gray-600">
+                <p><strong>Acme Corp:</strong> john@acmecorp.com / jane@acmecorp.com / bob@acmecorp.com</p>
+                <p><strong>TechStartup:</strong> alice@techstartup.com / mike@techstartup.com</p>
+                <p><strong>Password:</strong> password</p>
+              </div>
             </div>
           </CardContent>
         </Card>

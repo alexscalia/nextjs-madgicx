@@ -63,7 +63,7 @@ export const authOptions: NextAuthOptions = {
     }),
     CredentialsProvider({
       id: "customer-signin",
-      name: "Customer Signin",
+      name: "Customer User Signin",
       credentials: {
         email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" }
@@ -74,22 +74,26 @@ export const authOptions: NextAuthOptions = {
         }
 
         try {
-          // Find customer by email
-          const customer = await prisma.customer.findUnique({
+          // Find customer user by email
+          const customerUser = await prisma.customerUser.findUnique({
             where: {
               email: credentials.email,
               deletedAt: null
+            },
+            include: {
+              customer: true,
+              role: true
             }
           })
 
-          if (!customer) {
+          if (!customerUser) {
             return null
           }
 
           // Verify password
           const isValidPassword = await bcrypt.compare(
             credentials.password,
-            customer.passwordHash
+            customerUser.passwordHash
           )
 
           if (!isValidPassword) {
@@ -98,12 +102,14 @@ export const authOptions: NextAuthOptions = {
 
           // Return user object
           return {
-            id: customer.id,
-            email: customer.email,
-            name: customer.name,
-            role: "customer",
-            companyName: customer.companyName,
-            plan: customer.plan
+            id: customerUser.id,
+            email: customerUser.email,
+            name: customerUser.name,
+            role: "customer-user",
+            customerRole: customerUser.role.name,
+            customerId: customerUser.customerId,
+            companyName: customerUser.customer.companyName,
+            plan: customerUser.customer.plan
           }
         } catch (error) {
           console.error("Auth error:", error)
@@ -176,7 +182,7 @@ export const authOptions: NextAuthOptions = {
         token.companyName = user.companyName
         token.plan = user.plan
         token.customerId = user.customerId
-        token.customerName = user.customerName
+        token.customerRole = user.customerRole
       }
       return token
     },
@@ -188,7 +194,7 @@ export const authOptions: NextAuthOptions = {
         session.user.companyName = token.companyName
         session.user.plan = token.plan
         session.user.customerId = token.customerId
-        session.user.customerName = token.customerName
+        session.user.customerRole = token.customerRole
       }
       return session
     }
