@@ -1,6 +1,6 @@
 "use client"
 
-
+import { useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -51,15 +51,20 @@ interface CampaignCardProps {
 }
 
 export function CampaignCard({ campaign }: CampaignCardProps) {
-
-  // Parse metrics safely
-  const metrics = campaign.metrics || {}
+  const [isLoading, setIsLoading] = useState(false)
+  
+  // Parse metrics safely with type guard
+  const isMetricsObject = (obj: unknown): obj is { spend?: number; impressions?: number; clicks?: number; currency?: string } => {
+    return obj !== null && typeof obj === 'object'
+  }
+  
+  const metrics = isMetricsObject(campaign.metrics) ? campaign.metrics : {}
   const spend = metrics.spend || 0
   const impressions = metrics.impressions || 0
   const clicks = metrics.clicks || 0
   const ctr = impressions > 0 ? (clicks / impressions) * 100 : 0
   const cpc = clicks > 0 ? spend / clicks : 0
-  const currency = getCampaignCurrency(campaign)
+  const currency = getCampaignCurrency({ metrics: metrics || undefined })
 
   // Get platform styling
   const getPlatformStyle = (platform: string) => {
@@ -140,7 +145,12 @@ export function CampaignCard({ campaign }: CampaignCardProps) {
           
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm" className="opacity-0 group-hover:opacity-100 transition-opacity">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="opacity-0 group-hover:opacity-100 transition-opacity"
+                disabled={isLoading}
+              >
                 <MoreHorizontal className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>

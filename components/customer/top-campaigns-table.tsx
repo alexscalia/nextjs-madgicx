@@ -109,13 +109,16 @@ export function TopCampaignsTable({ campaigns }: TopCampaignsTableProps) {
         bValue = b.calculatedMetrics.spend
     }
 
-    if (typeof aValue === 'string') {
+    if (typeof aValue === 'string' && typeof bValue === 'string') {
       return sortDirection === 'asc' 
         ? aValue.localeCompare(bValue)
         : bValue.localeCompare(aValue)
     }
 
-    return sortDirection === 'asc' ? aValue - bValue : bValue - aValue
+    // Both values should be numbers at this point
+    const aNum = typeof aValue === 'number' ? aValue : 0
+    const bNum = typeof bValue === 'number' ? bValue : 0
+    return sortDirection === 'asc' ? aNum - bNum : bNum - aNum
   })
 
   const handleSort = (field: SortField) => {

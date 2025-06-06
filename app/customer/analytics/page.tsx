@@ -89,7 +89,10 @@ export default async function AnalyticsPage() {
     }, 0)
 
     // Get the primary currency from campaigns (use the most common one)
-    const currencies = campaigns.map(c => getCampaignCurrency(c))
+    const currencies = campaigns.map(c => {
+      const metricsWithCurrency = c.metrics as { currency?: string } | null
+      return getCampaignCurrency({ metrics: metricsWithCurrency || undefined })
+    })
     const primaryCurrency = currencies.length > 0 
       ? currencies.reduce((a, b, i, arr) => 
           arr.filter(v => v === a).length >= arr.filter(v => v === b).length ? a : b
