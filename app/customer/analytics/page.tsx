@@ -3,7 +3,7 @@ import { authOptions } from "../../api/auth/[...nextauth]/route"
 import { PrismaClient } from "../../generated/prisma"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
+
 import {
   Select,
   SelectContent,
@@ -19,19 +19,12 @@ import { KPICard } from "@/components/customer/kpi-card"
 import { 
   BarChart3,
   TrendingUp,
-  TrendingDown,
   DollarSign,
-  Eye,
+      Eye,
   MousePointer,
   Target,
-  Calendar,
   Download,
-  Filter,
-  Zap,
-  Users,
-  ArrowUpRight,
-  ArrowDownRight,
-  Minus
+  Zap
 } from "lucide-react"
 import { subDays } from "date-fns"
 import { formatDisplayCurrency, getCampaignCurrency } from "@/lib/currency"
@@ -75,22 +68,22 @@ export default async function AnalyticsPage() {
   // Calculate analytics data
   const getAnalyticsData = () => {
     const totalSpend = campaigns.reduce((sum, campaign) => {
-      const metrics = campaign.metrics as any
+      const metrics = campaign.metrics as { spend?: number } | null
       return sum + (metrics?.spend || 0)
     }, 0)
 
     const totalImpressions = campaigns.reduce((sum, campaign) => {
-      const metrics = campaign.metrics as any
+      const metrics = campaign.metrics as { impressions?: number } | null
       return sum + (metrics?.impressions || 0)
     }, 0)
 
     const totalClicks = campaigns.reduce((sum, campaign) => {
-      const metrics = campaign.metrics as any
+      const metrics = campaign.metrics as { clicks?: number } | null
       return sum + (metrics?.clicks || 0)
     }, 0)
 
     const totalConversions = campaigns.reduce((sum, campaign) => {
-      const metrics = campaign.metrics as any
+      const metrics = campaign.metrics as { conversions?: number } | null
       return sum + (metrics?.conversions || 0)
     }, 0)
 
@@ -108,8 +101,6 @@ export default async function AnalyticsPage() {
     const costPerConversion = totalConversions > 0 ? totalSpend / totalConversions : 0
 
     // Calculate trends (comparing to previous period)
-    const prevPeriodStart = subDays(startDate, 30)
-    const prevPeriodEnd = startDate
     
     // For demo purposes, simulate previous period data
     const prevSpend = totalSpend * 0.85 // 15% growth
@@ -123,9 +114,21 @@ export default async function AnalyticsPage() {
     const conversionsTrend = totalConversions > 0 ? ((totalConversions - prevConversions) / prevConversions) * 100 : 0
 
     // Platform breakdown
-    const platformData = campaigns.reduce((acc, campaign) => {
+    const platformData = campaigns.reduce((acc: Record<string, {
+      platform: string
+      spend: number
+      impressions: number
+      clicks: number
+      conversions: number
+      campaigns: number
+    }>, campaign) => {
       const platform = campaign.platform
-      const metrics = campaign.metrics as any
+      const metrics = campaign.metrics as {
+        spend?: number
+        impressions?: number
+        clicks?: number
+        conversions?: number
+      }
       
       if (!acc[platform]) {
         acc[platform] = {
@@ -145,7 +148,7 @@ export default async function AnalyticsPage() {
       acc[platform].campaigns += 1
       
       return acc
-    }, {} as Record<string, any>)
+    }, {})
 
     return {
       totalSpend,

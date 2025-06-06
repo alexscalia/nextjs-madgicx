@@ -192,7 +192,7 @@ async function fetchFacebookCampaigns(accessToken: string, accountId: string) {
 
     // Fetch insights (performance metrics) for each campaign
     const campaignsWithInsights = await Promise.all(
-      campaigns.map(async (campaign: any) => {
+              campaigns.map(async (campaign: { id: string; name: string; status: string; objective?: string; insights?: { spend?: string } }) => {
         try {
           // Fetch insights for this campaign
           const insightsUrl = `https://graph.facebook.com/v18.0/${campaign.id}/insights`

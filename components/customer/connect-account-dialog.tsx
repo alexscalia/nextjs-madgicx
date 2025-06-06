@@ -23,7 +23,7 @@ import {
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Plus, Loader2, AlertCircle, Search, Building2, Calendar } from "lucide-react"
+import { Plus, Loader2, AlertCircle, Search, Building2 } from "lucide-react"
 
 interface ConnectAccountDialogProps {
   customerId: string

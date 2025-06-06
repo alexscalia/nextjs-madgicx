@@ -175,8 +175,8 @@ export function getCurrencySymbol(currencyCode: string): string {
 /**
  * Extract currency from campaign metrics
  */
-export function getCampaignCurrency(campaign: any): string {
-  return campaign.metrics?.currency || 'USD'
+export function getCampaignCurrency(campaign: { metrics?: { currency?: string } } | null): string {
+  return campaign?.metrics?.currency || 'USD'
 }
 
 /**

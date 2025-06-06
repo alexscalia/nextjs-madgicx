@@ -35,22 +35,13 @@ export function PlatformComparisonChart({ data }: PlatformComparisonChartProps) 
               item.platform
   }))
 
-  const getPlatformColor = (platform: string) => {
-    switch (platform.toLowerCase()) {
-      case 'meta':
-        return '#3b82f6'
-      case 'google ads':
-        return '#10b981'
-      case 'tiktok':
-        return '#ec4899'
-      case 'ga4':
-        return '#f59e0b'
-      default:
-        return '#6b7280'
-    }
-  }
 
-  const CustomTooltip = ({ active, payload, label }: any) => {
+
+  const CustomTooltip = ({ active, payload, label }: {
+    active?: boolean
+    payload?: Array<{ payload: PlatformData }>
+    label?: string
+  }) => {
     if (active && payload && payload.length) {
       const data = payload[0].payload
       return (

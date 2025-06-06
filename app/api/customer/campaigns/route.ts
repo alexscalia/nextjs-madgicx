@@ -6,7 +6,7 @@ import { PrismaClient } from "../../../generated/prisma"
 const prisma = new PrismaClient()
 
 // GET /api/customer/campaigns - Fetch all campaigns for the authenticated customer
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     const session = await getServerSession(authOptions)
     

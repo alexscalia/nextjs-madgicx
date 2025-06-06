@@ -2,6 +2,19 @@ import { NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "../../../auth/[...nextauth]/route"
 
+interface DiscoveredAccount {
+  facebookId: string
+  accountId: string
+  name: string
+  currency: string
+  timezone: string
+  status: number
+  business?: string
+  businessName?: string
+  spendCap?: string
+  createdTime: string
+}
+
 // POST /api/customer/accounts/discover-facebook-accounts - Discover all Facebook ad accounts accessible by a token
 export async function POST(request: NextRequest) {
   try {
@@ -74,7 +87,18 @@ async function fetchAllAdAccounts(accessToken: string) {
     const accounts = data.data || []
 
     // Process and format the accounts
-    const formattedAccounts = accounts.map((account: any) => ({
+    const formattedAccounts = accounts.map((account: {
+      id: string
+      account_id: string
+      name: string
+      currency: string
+      timezone_name: string
+      account_status: number
+      business?: string
+      business_name?: string
+      spend_cap?: string
+      created_time: string
+    }) => ({
       facebookId: account.id,
       accountId: account.account_id,
       name: account.name,
@@ -91,8 +115,8 @@ async function fetchAllAdAccounts(accessToken: string) {
     try {
       const businessAccounts = await fetchBusinessAdAccounts(accessToken)
       // Merge with regular ad accounts, avoiding duplicates
-      const allAccountIds = new Set(formattedAccounts.map((acc: any) => acc.accountId))
-      const uniqueBusinessAccounts = businessAccounts.filter((acc: any) => !allAccountIds.has(acc.accountId))
+      const allAccountIds = new Set(formattedAccounts.map((acc: DiscoveredAccount) => acc.accountId))
+      const uniqueBusinessAccounts = businessAccounts.filter((acc: DiscoveredAccount) => !allAccountIds.has(acc.accountId))
       formattedAccounts.push(...uniqueBusinessAccounts)
     } catch (businessError) {
       console.log('Could not fetch business accounts (normal if token has limited permissions):', businessError)
@@ -145,7 +169,16 @@ async function fetchBusinessAdAccounts(accessToken: string) {
           const accountsData = await accountsResponse.json()
           const accounts = accountsData.data || []
           
-          const formattedAccounts = accounts.map((account: any) => ({
+          const formattedAccounts = accounts.map((account: {
+            id: string
+            account_id: string
+            name: string
+            currency: string
+            timezone_name: string
+            account_status: number
+            spend_cap?: string
+            created_time: string
+          }) => ({
             facebookId: account.id,
             accountId: account.account_id,
             name: account.name,

@@ -18,11 +18,8 @@ import {
   Edit3,
   Eye,
   RefreshCw,
-  TrendingUp,
-  TrendingDown,
   DollarSign,
   Target,
-  Users,
   MousePointer
 } from "lucide-react"
 import { formatDisplayCurrency, getCampaignCurrency } from "@/lib/currency"
@@ -39,7 +36,7 @@ interface Campaign {
   budget: number | null
   startDate: Date | null
   endDate: Date | null
-  metrics: any
+  metrics: unknown
   date: Date
   createdAt: Date
   updatedAt: Date
@@ -54,7 +51,6 @@ interface CampaignCardProps {
 }
 
 export function CampaignCard({ campaign }: CampaignCardProps) {
-  const [isLoading, setIsLoading] = useState(false)
 
   // Parse metrics safely
   const metrics = campaign.metrics || {}

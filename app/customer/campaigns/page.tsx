@@ -3,7 +3,7 @@ import { authOptions } from "../../api/auth/[...nextauth]/route"
 import { PrismaClient } from "../../generated/prisma"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
+
 import { Input } from "@/components/ui/input"
 import {
   Select,
@@ -16,15 +16,10 @@ import { CampaignCard } from "@/components/customer/campaign-card"
 import { CreateCampaignDialog } from "@/components/customer/create-campaign-dialog"
 import { 
   Target,
-  Search,
   Filter,
-  BarChart3,
   DollarSign,
   Eye,
   MousePointer,
-  TrendingUp,
-  Play,
-  Pause,
   RefreshCw
 } from "lucide-react"
 
@@ -43,7 +38,7 @@ interface Campaign {
   budget: number | null
   startDate: Date | null
   endDate: Date | null
-  metrics: any
+  metrics: unknown
   date: Date
   createdAt: Date
   updatedAt: Date
