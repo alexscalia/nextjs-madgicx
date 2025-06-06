@@ -8,6 +8,7 @@ async function main() {
   console.log('🌱 Starting database seed...')
 
   // Clear existing data
+  await prisma.subCustomer.deleteMany()
   await prisma.staffUser.deleteMany()
   await prisma.staffRole.deleteMany()
   await prisma.customerUser.deleteMany()
@@ -106,31 +107,36 @@ async function main() {
   const staffUsers = [
     {
       email: 'admin001@admin.com',
-      name: 'Alex Scalia',
+      firstName: 'Alex',
+      lastName: 'Scalia',
       roleId: adminRole.id,
       password: 'password'
     },
     {
       email: 'admin002@admin.com',
-      name: 'Sarah Johnson',
+      firstName: 'Sarah',
+      lastName: 'Johnson',
       roleId: supportRole.id,
       password: 'password'
     },
     {
       email: 'admin003@admin.com', 
-      name: 'Michael Chen',
+      firstName: 'Michael',
+      lastName: 'Chen',
       roleId: supportRole.id,
       password: 'password'
     },
     {
       email: 'admin004@admin.com',
-      name: 'Emma Rodriguez',
+      firstName: 'Emma',
+      lastName: 'Rodriguez',
       roleId: adminRole.id,
       password: 'password'
     },
     {
       email: 'admin005@admin.com',
-      name: 'David Thompson',
+      firstName: 'David',
+      lastName: 'Thompson',
       roleId: supportRole.id, 
       password: 'password'
     }
@@ -143,7 +149,8 @@ async function main() {
     const staffUser = await prisma.staffUser.create({
       data: {
         email: userData.email,
-        name: userData.name,
+        firstName: userData.firstName,
+        lastName: userData.lastName,
         roleId: userData.roleId,
         passwordHash: hashedPassword,
       },
@@ -152,42 +159,47 @@ async function main() {
       }
     })
     
-    console.log(`✅ Created staff user: ${staffUser.name} (${staffUser.role.name})`)
+    console.log(`✅ Created staff user: ${staffUser.firstName} ${staffUser.lastName} (${staffUser.role.name})`)
   }
 
   // Define customer users data
   const customerUsers = [
     {
       email: 'john@acmecorp.com',
-      name: 'John Smith',
+      firstName: 'John',
+      lastName: 'Smith',
       customerId: acmeCustomer.id,
       roleId: customerAdminRole.id,
       password: 'password'
     },
     {
       email: 'jane@acmecorp.com',
-      name: 'Jane Doe',
+      firstName: 'Jane',
+      lastName: 'Doe',
       customerId: acmeCustomer.id,
       roleId: customerEditorRole.id,
       password: 'password'
     },
     {
       email: 'bob@acmecorp.com',
-      name: 'Bob Wilson',
+      firstName: 'Bob',
+      lastName: 'Wilson',
       customerId: acmeCustomer.id,
       roleId: customerViewerRole.id,
       password: 'password'
     },
     {
       email: 'alice@techstartup.com',
-      name: 'Alice Johnson',
+      firstName: 'Alice',
+      lastName: 'Johnson',
       customerId: techStartupCustomer.id,
       roleId: customerAdminRole.id,
       password: 'password'
     },
     {
       email: 'mike@techstartup.com',
-      name: 'Mike Davis',
+      firstName: 'Mike',
+      lastName: 'Davis',
       customerId: techStartupCustomer.id,
       roleId: customerEditorRole.id,
       password: 'password'
@@ -196,25 +208,26 @@ async function main() {
 
   // Add owner users for the additional customers
   const additionalOwners = [
-    { email: 'admin@globalsolutions.com', name: 'Sarah Global', customer: createdCustomers[2] },
-    { email: 'owner@creativeagency.com', name: 'Mark Creative', customer: createdCustomers[3] },
-    { email: 'ceo@dataanalytics.com', name: 'Lisa Analytics', customer: createdCustomers[4] },
-    { email: 'founder@marketinghub.com', name: 'Tom Marketing', customer: createdCustomers[5] },
-    { email: 'admin@ecommerceplus.com', name: 'Emma Commerce', customer: createdCustomers[6] },
-    { email: 'cto@digitaltransform.com', name: 'Alex Digital', customer: createdCustomers[7] },
-    { email: 'lead@saassolutions.com', name: 'Chris SaaS', customer: createdCustomers[8] },
-    { email: 'dev@mobileapps.com', name: 'Jordan Mobile', customer: createdCustomers[9] },
-    { email: 'admin@cloudservices.com', name: 'Taylor Cloud', customer: createdCustomers[10] },
-    { email: 'researcher@airesearch.com', name: 'Sam AI', customer: createdCustomers[11] },
-    { email: 'founder@blockchaintech.com', name: 'Morgan Block', customer: createdCustomers[12] },
-    { email: 'manager@socialmedia.com', name: 'Casey Social', customer: createdCustomers[13] },
+    { email: 'admin@globalsolutions.com', firstName: 'Sarah', lastName: 'Global', customer: createdCustomers[2] },
+    { email: 'owner@creativeagency.com', firstName: 'Mark', lastName: 'Creative', customer: createdCustomers[3] },
+    { email: 'ceo@dataanalytics.com', firstName: 'Lisa', lastName: 'Analytics', customer: createdCustomers[4] },
+    { email: 'founder@marketinghub.com', firstName: 'Tom', lastName: 'Marketing', customer: createdCustomers[5] },
+    { email: 'admin@ecommerceplus.com', firstName: 'Emma', lastName: 'Commerce', customer: createdCustomers[6] },
+    { email: 'cto@digitaltransform.com', firstName: 'Alex', lastName: 'Digital', customer: createdCustomers[7] },
+    { email: 'lead@saassolutions.com', firstName: 'Chris', lastName: 'SaaS', customer: createdCustomers[8] },
+    { email: 'dev@mobileapps.com', firstName: 'Jordan', lastName: 'Mobile', customer: createdCustomers[9] },
+    { email: 'admin@cloudservices.com', firstName: 'Taylor', lastName: 'Cloud', customer: createdCustomers[10] },
+    { email: 'researcher@airesearch.com', firstName: 'Sam', lastName: 'AI', customer: createdCustomers[11] },
+    { email: 'founder@blockchaintech.com', firstName: 'Morgan', lastName: 'Block', customer: createdCustomers[12] },
+    { email: 'manager@socialmedia.com', firstName: 'Casey', lastName: 'Social', customer: createdCustomers[13] },
   ]
 
   // Add additional owners to the customer users array
   additionalOwners.forEach(owner => {
     customerUsers.push({
       email: owner.email,
-      name: owner.name,
+      firstName: owner.firstName,
+      lastName: owner.lastName,
       customerId: owner.customer.id,
       roleId: customerAdminRole.id,
       password: 'password'
@@ -228,7 +241,8 @@ async function main() {
     const customerUser = await prisma.customerUser.create({
       data: {
         email: userData.email,
-        name: userData.name,
+        firstName: userData.firstName,
+        lastName: userData.lastName,
         customerId: userData.customerId,
         roleId: userData.roleId,
         passwordHash: hashedPassword,
@@ -239,8 +253,41 @@ async function main() {
       }
     })
     
-    console.log(`✅ Created customer user: ${customerUser.name} (${customerUser.role.name} at ${customerUser.customer.companyName})`)
+    console.log(`✅ Created customer user: ${customerUser.firstName} ${customerUser.lastName} (${customerUser.role.name} at ${customerUser.customer.companyName})`)
   }
+
+  // Create sub customers (10 for each customer)
+  console.log('🔧 Creating sub customers...')
+  
+  for (let i = 0; i < createdCustomers.length; i++) {
+    const customer = createdCustomers[i]
+    const companyDomain = customer.companyName?.toLowerCase().replace(/\s+/g, '') || 'company'
+    
+    for (let j = 1; j <= 10; j++) {
+      const firstName = faker.person.firstName()
+      const lastName = faker.person.lastName()
+      const email = `${firstName.toLowerCase()}.${lastName.toLowerCase()}@${companyDomain}.com`
+      const hashedPassword = await bcrypt.hash('password', 12)
+      
+      const subCustomer = await prisma.subCustomer.create({
+        data: {
+          email: email,
+          firstName: firstName,
+          lastName: lastName,
+          customerId: customer.id,
+          passwordHash: hashedPassword,
+          status: j <= 8 ? 'ACTIVE' : (j === 9 ? 'INACTIVE' : 'SUSPENDED'), // Mix of statuses
+        }
+      })
+      
+      if (j === 1) {
+        console.log(`✅ Created sub customers for ${customer.companyName} (showing first): ${subCustomer.firstName} ${subCustomer.lastName}`)
+      }
+    }
+  }
+  
+  const totalSubCustomers = createdCustomers.length * 10
+  console.log(`✅ Created ${totalSubCustomers} sub customers total`)
 
   console.log('🎉 Database seeding completed successfully!')
 }

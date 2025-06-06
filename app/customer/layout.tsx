@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation"
 import { getServerSession } from "next-auth"
 import { CustomerSidebar } from "@/components/customer/sidebar"
+import { CustomerTopBar } from "@/components/customer/top-bar"
 import { authOptions } from "../api/auth/[...nextauth]/route"
 
 export default async function CustomerLayout({
@@ -21,9 +22,12 @@ export default async function CustomerLayout({
   return (
     <div className="flex h-screen bg-gray-100">
       <CustomerSidebar />
-      <main className="flex-1 overflow-y-auto">
-        {children}
-      </main>
+      <div className="flex-1 flex flex-col">
+        <CustomerTopBar />
+        <main className="flex-1 overflow-y-auto">
+          {children}
+        </main>
+      </div>
     </div>
   )
 } 

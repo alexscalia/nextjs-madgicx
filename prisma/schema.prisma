@@ -35,7 +35,9 @@ model StaffRole {
 model StaffUser {
   id           String     @id @default(uuid())
   email        String     @unique
-  name         String?
+  firstName    String?
+  middleName   String?
+  lastName     String?
   roleId       String
   role         StaffRole  @relation(fields: [roleId], references: [id])
   passwordHash String
@@ -60,8 +62,6 @@ model Customer {
   id           String     @id @default(uuid())
   name         String?
   companyName  String?
-  email        String     @unique
-  passwordHash String
   plan         String?
   status       UserStatus @default(ACTIVE)
   createdAt    DateTime   @default(now())
@@ -82,7 +82,9 @@ model CustomerUser {
   customerId   String
   customer     Customer     @relation(fields: [customerId], references: [id])
   email        String       @unique
-  name         String?
+  firstName    String?
+  middleName   String?
+  lastName     String?
   roleId       String
   role         CustomerRole @relation(fields: [roleId], references: [id])
   passwordHash String
@@ -97,7 +99,9 @@ model SubCustomer {
   customerId      String
   customer        Customer   @relation(fields: [customerId], references: [id])
   email           String     @unique
-  name            String?
+  firstName       String?
+  middleName      String?
+  lastName        String?
   passwordHash    String
   status          UserStatus @default(ACTIVE)
   createdAt       DateTime   @default(now())

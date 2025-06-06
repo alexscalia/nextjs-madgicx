@@ -3,21 +3,15 @@
 import { useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { signOut, useSession } from "next-auth/react"
 import { Button } from "@/components/ui/button"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import { Badge } from "@/components/ui/badge"
-import { Separator } from "@/components/ui/separator"
 import { 
   LayoutDashboard, 
   BarChart3, 
   Target, 
   Users, 
-  Settings, 
-  LogOut,
+  Settings,
   ChevronLeft,
-  ChevronRight,
-  Building2
+  ChevronRight
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -52,11 +46,6 @@ const navigation = [
 export function CustomerSidebar() {
   const [collapsed, setCollapsed] = useState(false)
   const pathname = usePathname()
-  const { data: session } = useSession()
-
-  const handleSignOut = async () => {
-    await signOut({ callbackUrl: "/auth/customer/signin" })
-  }
 
   return (
     <div className={cn(
@@ -107,57 +96,7 @@ export function CustomerSidebar() {
         })}
       </nav>
 
-      <Separator />
 
-      {/* Company & User Profile */}
-      <div className="p-4">
-        {!collapsed && session?.user?.companyName && (
-          <div className="mb-3 p-2 bg-gray-50 rounded-lg">
-            <div className="flex items-center gap-2">
-              <Building2 className="h-4 w-4 text-gray-500" />
-              <span className="text-sm font-medium text-gray-700 truncate">
-                {session.user.companyName}
-              </span>
-            </div>
-          </div>
-        )}
-        
-        <div className={cn(
-          "flex items-center gap-3",
-          collapsed && "justify-center"
-        )}>
-          <Avatar className="h-8 w-8">
-            <AvatarFallback className="bg-green-600 text-white text-sm">
-              {session?.user?.name?.[0]?.toUpperCase() || 'C'}
-            </AvatarFallback>
-          </Avatar>
-          
-          {!collapsed && (
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-gray-900 truncate">
-                {session?.user?.name || 'Customer User'}
-              </p>
-              <div className="flex items-center gap-2">
-                <Badge variant="outline" className="text-xs">
-                  {session?.user?.role || 'User'}
-                </Badge>
-              </div>
-            </div>
-          )}
-        </div>
-        
-        {!collapsed && (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleSignOut}
-            className="w-full mt-3 justify-start text-gray-600 hover:text-gray-900"
-          >
-            <LogOut className="h-4 w-4 mr-2" />
-            Sign Out
-          </Button>
-        )}
-      </div>
     </div>
   )
 } 

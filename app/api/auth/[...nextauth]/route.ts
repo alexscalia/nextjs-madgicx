@@ -56,7 +56,10 @@ const authOptions: NextAuthOptions = {
           return {
             id: staffUser.id,
             email: staffUser.email,
-            name: staffUser.name,
+            firstName: staffUser.firstName,
+            middleName: staffUser.middleName,
+            lastName: staffUser.lastName,
+            name: [staffUser.firstName, staffUser.middleName, staffUser.lastName].filter(Boolean).join(' ') || null,
             role: staffUser.role.name,
             roleId: staffUser.roleId
           }
@@ -123,7 +126,10 @@ const authOptions: NextAuthOptions = {
           return {
             id: customerUser.id,
             email: customerUser.email,
-            name: customerUser.name,
+            firstName: customerUser.firstName,
+            middleName: customerUser.middleName,
+            lastName: customerUser.lastName,
+            name: [customerUser.firstName, customerUser.middleName, customerUser.lastName].filter(Boolean).join(' ') || null,
             role: "customer-user",
             customerRole: customerUser.role.name,
             customerId: customerUser.customerId,
@@ -192,7 +198,10 @@ const authOptions: NextAuthOptions = {
           return {
             id: subCustomer.id,
             email: subCustomer.email,
-            name: subCustomer.name,
+            firstName: subCustomer.firstName,
+            middleName: subCustomer.middleName,
+            lastName: subCustomer.lastName,
+            name: [subCustomer.firstName, subCustomer.middleName, subCustomer.lastName].filter(Boolean).join(' ') || null,
             role: "subcustomer",
             customerId: subCustomer.customerId,
             customerName: subCustomer.customer.name
@@ -214,6 +223,9 @@ const authOptions: NextAuthOptions = {
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
+        token.firstName = user.firstName
+        token.middleName = user.middleName
+        token.lastName = user.lastName
         token.role = user.role
         token.roleId = user.roleId
         token.companyName = user.companyName
@@ -226,6 +238,9 @@ const authOptions: NextAuthOptions = {
     async session({ session, token }) {
       if (token) {
         session.user.id = token.sub || ""
+        session.user.firstName = token.firstName
+        session.user.middleName = token.middleName
+        session.user.lastName = token.lastName
         session.user.role = token.role
         session.user.roleId = token.roleId
         session.user.companyName = token.companyName

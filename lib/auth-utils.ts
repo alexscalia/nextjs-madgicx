@@ -6,7 +6,7 @@ export interface AuthError {
   details?: string
 }
 
-export function getAuthError(result: any): AuthError {
+export function getAuthError(result: { error?: string | null; status?: number } | null | undefined): AuthError {
   if (!result) {
     return {
       type: 'network',
@@ -94,7 +94,7 @@ export function getAuthError(result: any): AuthError {
     }
   }
 
-  if (result.status >= 500) {
+  if (result.status && result.status >= 500) {
     return {
       type: 'server',
       message: 'Server error',

@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation"
 import { getServerSession } from "next-auth"
 import { Sidebar } from "@/components/staff/sidebar"
+import { TopBar } from "@/components/staff/top-bar"
 import { authOptions } from "../api/auth/[...nextauth]/route"
 
 export default async function StaffLayout({
@@ -21,9 +22,12 @@ export default async function StaffLayout({
   return (
     <div className="flex h-screen bg-gray-100">
       <Sidebar />
-      <main className="flex-1 overflow-y-auto">
-        {children}
-      </main>
+      <div className="flex-1 flex flex-col">
+        <TopBar />
+        <main className="flex-1 overflow-y-auto">
+          {children}
+        </main>
+      </div>
     </div>
   )
 } 

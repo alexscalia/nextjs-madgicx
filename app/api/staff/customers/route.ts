@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "../../auth/[...nextauth]/route"
 import { PrismaClient } from "../../../generated/prisma"
-import bcrypt from "bcryptjs"
+import bcrypt from 'bcryptjs'
 
 const prisma = new PrismaClient()
 
@@ -32,7 +32,14 @@ export async function GET(request: NextRequest) {
     const skip = (validatedPage - 1) * validatedLimit
 
     // Build where clause
-    const whereClause: any = {
+    const whereClause: {
+      deletedAt: null
+      OR?: Array<{
+        name?: { contains: string; mode: 'insensitive' }
+        companyName?: { contains: string; mode: 'insensitive' }
+      }>
+      plan?: string
+    } = {
       deletedAt: null
     }
 
@@ -40,7 +47,6 @@ export async function GET(request: NextRequest) {
     if (search) {
       whereClause.OR = [
         { name: { contains: search, mode: 'insensitive' } },
-        { email: { contains: search, mode: 'insensitive' } },
         { companyName: { contains: search, mode: 'insensitive' } }
       ]
     }
@@ -51,7 +57,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Build order by clause
-    const validSortFields = ['name', 'email', 'companyName', 'plan', 'createdAt', 'updatedAt']
+    const validSortFields = ['name', 'companyName', 'plan', 'createdAt', 'updatedAt']
     const sortDirection: 'asc' | 'desc' = sortOrder === 'asc' ? 'asc' : 'desc'
     const orderBy = validSortFields.includes(sortBy) 
       ? { [sortBy]: sortDirection }
@@ -64,7 +70,6 @@ export async function GET(request: NextRequest) {
         select: {
           id: true,
           name: true,
-          email: true,
           companyName: true,
           plan: true,
           createdAt: true,
@@ -112,17 +117,13 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { name, email, companyName, plan, password } = body
+    const { name, companyName, plan, ownerName, ownerEmail, ownerPassword } = body
 
     // Enhanced validation
     const validationErrors: string[] = []
     
     if (!name || typeof name !== 'string' || name.trim().length < 2) {
-      validationErrors.push("Name must be at least 2 characters long")
-    }
-    
-    if (!email || typeof email !== 'string' || !email.includes('@')) {
-      validationErrors.push("Valid email is required")
+      validationErrors.push("Contact name must be at least 2 characters long")
     }
     
     if (!companyName || typeof companyName !== 'string' || companyName.trim().length < 2) {
@@ -132,9 +133,20 @@ export async function POST(request: NextRequest) {
     if (!plan || typeof plan !== 'string') {
       validationErrors.push("Plan is required")
     }
-    
-    if (!password || typeof password !== 'string' || password.length < 8) {
-      validationErrors.push("Password must be at least 8 characters long")
+
+    // Owner validation
+    if (!ownerName || typeof ownerName !== 'string' || ownerName.trim().length < 2) {
+      validationErrors.push("Owner name must be at least 2 characters long")
+    }
+
+    if (!ownerEmail || typeof ownerEmail !== 'string') {
+      validationErrors.push("Owner email is required")
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(ownerEmail.trim())) {
+      validationErrors.push("Please enter a valid owner email address")
+    }
+
+    if (!ownerPassword || typeof ownerPassword !== 'string' || ownerPassword.length < 6) {
+      validationErrors.push("Owner password must be at least 6 characters long")
     }
 
     if (validationErrors.length > 0) {
@@ -144,40 +156,71 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Normalize email
-    const normalizedEmail = email.toLowerCase().trim()
-
-    // Check if customer already exists
-    const existingCustomer = await prisma.customer.findUnique({
-      where: { email: normalizedEmail }
+    // Check if owner email already exists
+    const existingUser = await prisma.customerUser.findUnique({
+      where: { email: ownerEmail.trim().toLowerCase() }
     })
 
-    if (existingCustomer && !existingCustomer.deletedAt) {
+    if (existingUser) {
       return NextResponse.json(
-        { error: "Customer with this email already exists" }, 
-        { status: 409 }
+        { error: "Validation failed", details: ["Owner email address is already in use"] }, 
+        { status: 400 }
       )
     }
 
-    // Hash password
-    const passwordHash = await bcrypt.hash(password, 12)
-
-    // Create customer
-    const customer = await prisma.customer.create({
-      data: {
-        name: name.trim(),
-        email: normalizedEmail,
-        companyName: companyName.trim(),
-        plan,
-        passwordHash,
-        createdAt: new Date(),
-        updatedAt: new Date()
-      }
+    // Get the "Owner" role
+    const ownerRole = await prisma.customerRole.findFirst({
+      where: { name: 'Owner' }
     })
 
-    // Return customer without password hash
-    const { passwordHash: _, ...customerResponse } = customer
-    return NextResponse.json(customerResponse, { status: 201 })
+    if (!ownerRole) {
+      return NextResponse.json(
+        { error: "Owner role not found. Please contact support." }, 
+        { status: 500 }
+      )
+    }
+
+    // Hash the password
+    const passwordHash = await bcrypt.hash(ownerPassword, 12)
+
+    // Create customer and owner user in a transaction
+    const result = await prisma.$transaction(async (tx) => {
+      // Create customer
+      const customer = await tx.customer.create({
+        data: {
+          name: name.trim(),
+          companyName: companyName.trim(),
+          plan,
+          createdAt: new Date(),
+          updatedAt: new Date()
+        }
+      })
+
+      // Create owner user
+      const ownerUser = await tx.customerUser.create({
+        data: {
+          name: ownerName.trim(),
+          email: ownerEmail.trim().toLowerCase(),
+          customerId: customer.id,
+          roleId: ownerRole.id,
+          passwordHash,
+          createdAt: new Date(),
+          updatedAt: new Date()
+        }
+      })
+
+      return { customer, ownerUser }
+    })
+
+    // Return success response (without password hash)
+    return NextResponse.json({
+      customer: result.customer,
+      owner: {
+        id: result.ownerUser.id,
+        name: result.ownerUser.name,
+        email: result.ownerUser.email
+      }
+    }, { status: 201 })
 
   } catch (error) {
     console.error("Error creating customer:", error)

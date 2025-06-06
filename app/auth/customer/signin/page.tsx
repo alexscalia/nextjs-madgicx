@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, Suspense } from "react"
 import { signIn } from "next-auth/react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
@@ -17,7 +17,7 @@ interface FormErrors {
   general?: string
 }
 
-export default function CustomerSignIn() {
+function CustomerSignInForm() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [isLoading, setIsLoading] = useState(false)
@@ -134,7 +134,7 @@ export default function CustomerSignIn() {
         setErrors({ general: authError.details || authError.message })
         setPassword("") // Clear password on authentication failure
       }
-    } catch (error) {
+    } catch {
       const errorMessage = 'Unable to connect to authentication server. Please check your internet connection.'
       setErrors({ general: errorMessage })
     } finally {
@@ -153,7 +153,7 @@ export default function CustomerSignIn() {
             Customer Portal
           </h2>
           <p className="mt-2 text-sm text-gray-600">
-            Sign in to access your organization's campaigns and analytics
+            Sign in to access your organization&apos;s campaigns and analytics
           </p>
         </div>
 
@@ -270,5 +270,13 @@ export default function CustomerSignIn() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function CustomerSignIn() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <CustomerSignInForm />
+    </Suspense>
   )
 } 
