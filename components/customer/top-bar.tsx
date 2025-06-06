@@ -22,19 +22,12 @@ import {
   Building2
 } from "lucide-react"
 import { AccountSelector } from "./account-selector"
-import { useState } from "react"
-import { ConnectAccountDialog } from "./connect-account-dialog"
 
 export function CustomerTopBar() {
   const { data: session } = useSession()
-  const [showConnectDialog, setShowConnectDialog] = useState(false)
 
   const handleSignOut = async () => {
     await signOut()
-  }
-
-  const handleNewAccount = () => {
-    setShowConnectDialog(true)
   }
 
   // Helper function to get full name
@@ -70,7 +63,7 @@ export function CustomerTopBar() {
         {/* Right side - Account selector, notifications, and user info */}
         <div className="flex items-center gap-4">
           {/* Account Selector */}
-          <AccountSelector onNewAccount={handleNewAccount} />
+          <AccountSelector />
           
           {/* Notifications */}
           <Button variant="ghost" size="sm" className="relative cursor-pointer">
@@ -128,12 +121,7 @@ export function CustomerTopBar() {
       </div>
       </div>
 
-      {/* Connect Account Dialog */}
-      <ConnectAccountDialog 
-        customerId={session?.user?.customerId || ''}
-        open={showConnectDialog}
-        onOpenChange={setShowConnectDialog}
-      />
+
     </>
   )
 } 
